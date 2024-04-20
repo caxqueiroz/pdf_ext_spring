@@ -1,0 +1,13 @@
+### Upload a file
+@token = {{env.JWT_TOKEN}}
+@file_path = {{env.FILE_PATH}}
+POST http://localhost:8080/extract/upload
+Content-Type: multipart/form-data; boundary=boundary1234
+Authorization: Bearer {{token}}
+
+--boundary1234
+Content-Disposition: form-data; name="file"; filename="sample110.pdf"
+Content-Type: application/pdf
+
+< {{file_path}}
+--boundary1234--
