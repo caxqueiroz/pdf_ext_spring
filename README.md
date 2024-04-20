@@ -1,4 +1,4 @@
-# pdf_ext_spring
+# PDF Extractor 
 
 This is a Spring Boot application that provides PDF extraction functionality. It uses JWT for authentication and includes actuator endpoints for application health monitoring. The application is built with Maven and can be run on any system with Java 17 installed.
 
