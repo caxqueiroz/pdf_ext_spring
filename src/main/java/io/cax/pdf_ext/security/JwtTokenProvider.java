@@ -21,7 +21,7 @@ public class JwtTokenProvider {
 
     private final Logger logger = Logger.getLogger(JwtTokenProvider.class.getName());
 
-    @Value("${auth.public_key}")
+    @Value("${auth_public_key}")
     private String publicKeyValue;
 
     /**
