@@ -1,5 +1,6 @@
 package io.cax.pdf_ext.security;
 
+import io.jsonwebtoken.Jwts;
 import jakarta.servlet.ServletException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.AuthenticationException;

@@ -50,7 +50,7 @@ public class ExtractorEngine {
                 JSONObject result  = doExtractTextFrom(inputFile);
                 successfulExtractsCounter.increment();
                 return result;
-            } catch (IOException e) {
+            } catch(Exception e) {
                 logger.severe(e.getMessage());
                 throw new RuntimeException(e);
             }

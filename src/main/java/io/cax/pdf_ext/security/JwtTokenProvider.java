@@ -24,6 +24,12 @@ public class JwtTokenProvider {
     @Value("${auth_public_key}")
     private String publicKeyValue;
 
+    private final JwtsWrapper jwtsWrapper;
+
+    public JwtTokenProvider(JwtsWrapper jwtsWrapper) {
+        this.jwtsWrapper = jwtsWrapper;
+    }
+
     /**
      * Validate the JWT token.
      * @param token The token to validate.
@@ -31,7 +37,7 @@ public class JwtTokenProvider {
      */
     public boolean validate(String token) {
         try {
-            Jwts.parser()
+            jwtsWrapper.parser()
                     .verifyWith(getPublicKey())
                     .build()
                     .parseSignedClaims(token)
@@ -44,7 +50,7 @@ public class JwtTokenProvider {
                 logger.severe("Invalid JWT signature");
                 return false;
             } catch (Exception e) {
-                logger.severe(e.getMessage());
+                logger.severe("exception while validation token: " + e.getMessage());
                 return false;
             }
     }
@@ -74,12 +80,16 @@ public class JwtTokenProvider {
         // Parse the token and get the claims
         String username = null;
         try {
-            username = Jwts.parser()
+
+            var claims = Jwts.parser()
                     .verifyWith(getPublicKey())
                     .build()
-                    .parseSignedClaims(token)
-                    .getPayload().getSubject();
+                    .parseSignedClaims(token);
+            username = claims.getPayload().get("username", String.class);
+
         } catch (InvalidKeySpecException e) {
+            throw new RuntimeException(e);
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
 
