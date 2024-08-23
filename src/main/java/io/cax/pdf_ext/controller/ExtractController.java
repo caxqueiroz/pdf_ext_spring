@@ -15,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 @RestController
@@ -40,8 +41,9 @@ public class ExtractController {
                 return new ResponseEntity<>("Please select a file!", HttpStatus.OK);
             }
 
+            String fileName = UUID.randomUUID().toString() + ".pdf";
             // save file temp folder
-            String tempFilePath = tempFolder + file.getOriginalFilename();
+            String tempFilePath = tempFolder + fileName;
             file.transferTo(new File(tempFilePath));
 
             JSONObject response = extractorEngine.extractTextFrom(tempFilePath);
@@ -50,6 +52,9 @@ public class ExtractController {
         } catch (IOException e) {
             logger.severe(e.getMessage());
             return new ResponseEntity<>("Could not upload the file: " + file.getOriginalFilename() + "!", HttpStatus.EXPECTATION_FAILED);
+        } catch (Exception e) {
+            logger.severe(e.getMessage());
+            return new ResponseEntity<>("An error occurred while processing the file: " + file.getOriginalFilename() + "!", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

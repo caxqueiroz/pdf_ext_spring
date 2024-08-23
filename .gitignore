@@ -36,3 +36,5 @@ integration_tests/
 scripts/private_key.pem
 scripts/public_key.pem
 nulltest.pdf
+
+.DS_Store
