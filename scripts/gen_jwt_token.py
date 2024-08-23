@@ -1,10 +1,9 @@
-import jwt
-import datetime
 import argparse
+import datetime
+import jwt
 import os
-from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import serialization
 
 
 def load_private_key(file_path):

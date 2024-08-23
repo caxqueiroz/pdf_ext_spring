@@ -13,22 +13,25 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 @Service
-public class EmbedderService {
+public class OpenAIEmbedderService implements Embedder {
     private static final VectorTypeSupport vectorTypeSupport = VectorizationProvider.getInstance().getVectorTypeSupport();
 
+    /* The OpenAI API URL */
     @Value("${openai.api.url}")
     private String openaiApiUrl;
 
+    /* The OpenAI API key */
     @Value("${openai.api.key}")
     private String apiKey;
 
+    /* The OpenAI API model */
     @Value("${openai.api.model}")
     private String model;
 
     /**
      * Embed a text using OpenAI API
-     * @param text
-     * @return
+     * @param text - the text to embed
+     * @return - the embedded text as VectorFloat object
      */
     public VectorFloat<?> embed(String text) {
         RestTemplate restTemplate = new RestTemplate();

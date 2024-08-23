@@ -2,11 +2,10 @@ package io.cax.pdf_ext;
 
 import io.cax.pdf_ext.model.Session;
 import io.cax.pdf_ext.model.XDoc;
-import io.cax.pdf_ext.service.EmbedderService;
+import io.cax.pdf_ext.service.OpenAIEmbedderService;
 import io.cax.pdf_ext.service.SessionService;
 import io.cax.pdf_ext.service.VectorSearch;
 import io.cax.pdf_ext.service.VectorSearchException;
-import io.github.jbellis.jvector.graph.*;
 import io.github.jbellis.jvector.vector.VectorUtil;
 import io.github.jbellis.jvector.vector.VectorizationProvider;
 import io.github.jbellis.jvector.vector.types.VectorFloat;
@@ -27,14 +26,13 @@ import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class VectorSearchTest {
 
     @Mock
-    private EmbedderService embedderService;
+    private OpenAIEmbedderService embedderService;
 
     @Mock
     private SessionService sessionService;

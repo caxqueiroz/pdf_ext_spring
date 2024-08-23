@@ -2,38 +2,42 @@ package io.cax.pdf_ext.service;
 
 import io.cax.pdf_ext.model.XDoc;
 import io.github.jbellis.jvector.graph.*;
+import io.github.jbellis.jvector.graph.similarity.BuildScoreProvider;
 import io.github.jbellis.jvector.graph.similarity.SearchScoreProvider;
 import io.github.jbellis.jvector.util.Bits;
 import io.github.jbellis.jvector.vector.VectorSimilarityFunction;
-import io.github.jbellis.jvector.vector.VectorizationProvider;
 import io.github.jbellis.jvector.vector.types.VectorFloat;
-import io.github.jbellis.jvector.vector.types.VectorTypeSupport;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import io.github.jbellis.jvector.graph.similarity.BuildScoreProvider;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.Vector;
 import java.util.stream.Collectors;
 
+/**
+ * Class that represents the vector search service.
+ */
 @Service
 public class VectorSearch {
 
+    /* The top K results to return */
     @Value("${topK}")
     private int topK;
 
+    /* The similarity function to use */
     @Value("${vector.similarity.function}")
     private String similarityFunctionName;
 
-    private EmbedderService embedderService;
+    /* The EmbedderService - creates embeddings from talking to the LLM model */
+    private OpenAIEmbedderService embedderService;
 
+    /* The SessionService - manages the user sessions */
     private SessionService sessionService;
 
-    private GraphIndexBuilder graphIndex;
 
     /**
      * Create a new VectorSearch.
@@ -41,11 +45,21 @@ public class VectorSearch {
     public VectorSearch() {
     }
 
+    @Autowired
+    public void setEmbedderService(OpenAIEmbedderService embedderService) {
+        this.embedderService = embedderService;
+    }
+
+    @Autowired
+    public void setSessionService(SessionService sessionService) {
+        this.sessionService = sessionService;
+    }
+
     /**
      * Add a document to the vector space.
-     * @param sessionId
-     * @param document
-     * @throws VectorSearchException
+     * @param sessionId - the session id
+     * @param document - the document to add
+     * @throws VectorSearchException - if an error occurs
      */
     public void addDocument(UUID sessionId, XDoc document) throws VectorSearchException {
 
@@ -60,10 +74,10 @@ public class VectorSearch {
     }
     /**
      * Search for a query in the vector space.
-     * @param sessionId
-     * @param query
-     * @return
-     * @throws VectorSearchException
+     * @param sessionId - the session id
+     * @param query - the query
+     * @return - the search result
+     * @throws VectorSearchException - if an error occurs
      */
     public JSONObject search(UUID sessionId, String query) throws VectorSearchException, IOException {
 
@@ -94,9 +108,9 @@ public class VectorSearch {
 
     /**
      * Convert a search result to a JSON object.
-     * @param sr
-     * @param docs
-     * @return
+     * @param sr - the search result
+     * @param docs - the documents
+     * @return - the JSON object
      */
     private JSONObject convertSearchResult(SearchResult sr, List<XDoc> docs) {
 

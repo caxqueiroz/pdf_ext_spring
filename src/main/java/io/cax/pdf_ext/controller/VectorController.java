@@ -1,6 +1,5 @@
 package io.cax.pdf_ext.controller;
 
-import io.cax.pdf_ext.service.SessionService;
 import io.cax.pdf_ext.service.VectorSearch;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
