@@ -60,16 +60,20 @@ public class VectorSearch {
      * @param sessionId - the session id
      * @param document - the document to add
      * @throws VectorSearchException - if an error occurs
+     * @return - the document id
      */
-    public void addDocument(UUID sessionId, XDoc document) throws VectorSearchException {
+    public UUID addDocument(UUID sessionId, XDoc document) throws VectorSearchException {
 
         if (sessionService.sessionExists(sessionId)) {
             var embeddedDocument = embedderService.embed(document.getContent());
             var session = sessionService.getSession(sessionId);
+            var docId = UUID.randomUUID();
+            document.setId(docId);
             session.getDocuments().add(document);
         } else {
             throw new VectorSearchException("Session does not exist!");
         }
+        return document.getId();
 
     }
     /**

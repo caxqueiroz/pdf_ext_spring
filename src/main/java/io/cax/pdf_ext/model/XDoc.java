@@ -5,10 +5,14 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.HashMap;
+import java.util.UUID;
 
 @Setter
 @Getter
 public class XDoc {
+
+    /* The id of the document */
+    private UUID id;
 
     /* The content of the document */
     private String content;

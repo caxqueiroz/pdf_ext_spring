@@ -21,7 +21,7 @@ public static final String XSESSION = "X__SESSION__X";
 
     /**
      * Create a new session
-     * @return
+     * @return - response entity
      */
     @PostMapping("/start")
     public ResponseEntity<String> createSession() {
@@ -30,9 +30,9 @@ public static final String XSESSION = "X__SESSION__X";
     }
 
     /**
-     * End session
-     * @param headerValue
-     * @return
+     * Ends session. all session data will be deleted
+     * @param headerValue - session header
+     * @return - response entity
      */
     @PostMapping("/end")
     public ResponseEntity<Object> endSearchSession(@RequestHeader(XSESSION) String headerValue) {
