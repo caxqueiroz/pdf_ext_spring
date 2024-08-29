@@ -3,19 +3,20 @@ package io.cax.pdf_ext.controller;
 import io.cax.pdf_ext.model.XDoc;
 import io.cax.pdf_ext.service.VectorSearch;
 import io.cax.pdf_ext.service.VectorSearchException;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
 
-@RestController("/search")
+@RestController
+@RequestMapping("/search")
+@Tag(name = "VectorController", description = "Controller for vector search operations")
 public class VectorController {
 
     private VectorSearch vectorService;
@@ -31,7 +32,8 @@ public class VectorController {
      * @param sessionId - session id
      * @return
      */
-    @PostMapping("/addDoc")
+    @PostMapping("/doc")
+    @Operation(summary = "Add a document", description = "Adds a document to the vector space")
     public ResponseEntity<Object> addDocument(@RequestBody String document, @RequestHeader(SessionController.XSESSION) String sessionId) {
         try {
             var xDoc = new XDoc();
@@ -52,6 +54,7 @@ public class VectorController {
      * @return - response entity
      */
     @PostMapping("/query")
+    @Operation(summary = "Search for a query", description = "Searches for a query in the vector space")
     public ResponseEntity<Object> search(@RequestBody String query, @RequestHeader(SessionController.XSESSION) String sessionId) {
         try {
             JSONObject response = vectorService.search(UUID.fromString(sessionId), query);

@@ -1,7 +1,7 @@
 ### Upload a file
 @token = {{env.JWT_TOKEN}}
 @file_path = {{env.FILE_PATH}}
-POST http://localhost:8080/extract/upload
+POST http://localhost:3500/extract/upload
 Content-Type: multipart/form-data; boundary=boundary1234
 Authorization: Bearer {{token}}
 

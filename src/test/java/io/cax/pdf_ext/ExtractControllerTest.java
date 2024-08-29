@@ -5,9 +5,6 @@ import io.cax.pdf_ext.security.JwtTokenProvider;
 import io.cax.pdf_ext.security.JwtsWrapper;
 import io.cax.pdf_ext.service.ExtractorEngine;
 import io.jsonwebtoken.Jwts;
-import io.micrometer.core.instrument.Counter;
-import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.Timer;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -20,55 +17,30 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.core.env.MapPropertySource;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
-import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
-@ContextConfiguration(initializers = ExtractControllerTest.Initializer.class)
+@ActiveProfiles("test")
 class ExtractControllerTest {
-
-    static class Initializer
-            implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-        public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
-            ConfigurableEnvironment env = configurableApplicationContext.getEnvironment();
-            Map<String, Object> map = new HashMap<>();
-            map.put("auth_public_key", Base64.getEncoder().encodeToString(keyPair.getPublic().getEncoded()));
-            env.getPropertySources().addFirst(new MapPropertySource("test", map));
-        }
-    }
-
-    @Autowired
-    private WebApplicationContext context;
-
-    @Mock
-    private MeterRegistry meterRegistry;
 
     @Mock
     private ExtractorEngine extractorEngine;
@@ -94,19 +66,9 @@ class ExtractControllerTest {
 
     @BeforeEach
     void setUp() {
-
         MockitoAnnotations.openMocks(this);
-        ReflectionTestUtils.setField(extractController, "tempFolder", "/tmp/");
-
-        // Create mock Timer and Counter
-        Timer mockTimer = mock(Timer.class);
-        Counter mockCounter = mock(Counter.class);
-        when(meterRegistry.timer(anyString())).thenReturn( mockTimer);
-        when(meterRegistry.counter(anyString())).thenReturn(mockCounter);
-
-        mockMvc = MockMvcBuilders
-                .webAppContextSetup(context)
-                .apply(springSecurity()) // Apply Spring Security filters
+        mockMvc = MockMvcBuilders.standaloneSetup(extractController)
+                .apply(springSecurity()) // Apply Spring Security configuration
                 .build();
     }
 

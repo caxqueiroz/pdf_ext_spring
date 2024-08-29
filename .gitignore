@@ -38,3 +38,5 @@ scripts/public_key.pem
 nulltest.pdf
 
 .DS_Store
+
+src/main/resources/application-dev.properties

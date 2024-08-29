@@ -35,8 +35,11 @@ public class SecurityConfig extends SecurityConfigurerAdapter<DefaultSecurityFil
 
         http.exceptionHandling(e -> e.authenticationEntryPoint(new JwtAuthenticationEntryPoint()));
         http.authorizeHttpRequests(requests -> {
-            requests.requestMatchers("/extract/upload/").permitAll();
+            //requests.requestMatchers("/extract/upload/").permitAll();
             requests.requestMatchers("/actuator/**").permitAll();
+//            requests.requestMatchers("/search/**").permitAll();
+//            requests.requestMatchers("/session/**").permitAll();
+            requests.requestMatchers("/docs/**").permitAll();
             requests.anyRequest().authenticated();
         });
         http.csrf(CsrfConfigurer::disable);

@@ -1,8 +1,6 @@
 package io.cax.pdf_ext.service;
 
-import io.github.jbellis.jvector.vector.VectorizationProvider;
-import io.github.jbellis.jvector.vector.types.VectorFloat;
-import io.github.jbellis.jvector.vector.types.VectorTypeSupport;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -14,7 +12,6 @@ import org.springframework.web.client.RestTemplate;
 
 @Service
 public class OpenAIEmbedderService implements Embedder {
-    private static final VectorTypeSupport vectorTypeSupport = VectorizationProvider.getInstance().getVectorTypeSupport();
 
     /* The OpenAI API URL */
     @Value("${openai.api.url}")
@@ -30,32 +27,42 @@ public class OpenAIEmbedderService implements Embedder {
 
     /**
      * Embed a text using OpenAI API
+     *
      * @param text - the text to embed
      * @return - the embedded text as VectorFloat object
      */
-    public VectorFloat<?> embed(String text) {
+    public float[] embed(String text) throws EmbedderException {
+
+        if (text == null || text.isEmpty()) {
+            throw new EmbedderException("Text cannot be null or empty");
+        }
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + apiKey);
         headers.set("Content-Type", "application/json");
 
         JSONObject requestBody = new JSONObject();
-        requestBody.put("input", text);
-        requestBody.put("model", model);
+        try {
 
+            requestBody.put("input", text);
+            requestBody.put("model", model);
+            HttpEntity<String> entity = new HttpEntity<>(requestBody.toString(), headers);
+            ResponseEntity<String> response = restTemplate.exchange(openaiApiUrl, HttpMethod.POST, entity, String.class);
+            JSONObject responseBody = null;
 
-        HttpEntity<String> entity = new HttpEntity<>(requestBody.toString(), headers);
-        ResponseEntity<String> response = restTemplate.exchange(openaiApiUrl, HttpMethod.POST, entity, String.class);
+            responseBody = new JSONObject(response.getBody());
+            JSONObject embedding = responseBody.getJSONArray("data").getJSONObject(0).getJSONObject("embedding");
+            // Convert the embedding to VectorFloat
+            float[] vectorArray = new float[embedding.length()];
+            for (int i = 0; i < embedding.length(); i++) {
 
-        JSONObject responseBody = new JSONObject(response.getBody());
-        JSONObject embedding = responseBody.getJSONArray("data").getJSONObject(0).getJSONObject("embedding");
+                vectorArray[i] = (float) embedding.getDouble(String.valueOf(i));
+            }
+            return vectorArray;
 
-        // Convert the embedding to VectorFloat
-        float[] vectorArray = new float[embedding.length()];
-        for (int i = 0; i < embedding.length(); i++) {
-            vectorArray[i] = embedding.getFloat(String.valueOf(i));
+        } catch (JSONException e) {
+            throw new EmbedderException("Could not create the request body for OpenAI API: " + e.getMessage());
         }
-        return vectorTypeSupport.createFloatVector(vectorArray);
 
     }
 }
