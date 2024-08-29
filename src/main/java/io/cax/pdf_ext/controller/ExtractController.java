@@ -2,6 +2,7 @@ package io.cax.pdf_ext.controller;
 
 
 import io.cax.pdf_ext.service.ExtractorEngine;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,11 +21,12 @@ import java.util.logging.Logger;
 
 @RestController
 @RequestMapping("/extract")
+@Tag(name = "ExtractController", description = "Controller for extracting text from documents")
 public class ExtractController {
 
     private final Logger logger = Logger.getLogger(ExtractController.class.getName());
 
-    @Value("${pdf_ext.temp_folder}")
+    @Value("${doc_ext_search.temp_folder}")
     private String tempFolder;
 
     private final ExtractorEngine extractorEngine;

@@ -7,6 +7,7 @@ import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.stereotype.Service;
 
@@ -68,7 +69,7 @@ public class ExtractorEngine {
      * @return A JSON object containing the extracted text.
      * @throws IOException If an error occurs while reading the document.
      */
-    private JSONObject doExtractTextFrom(String inputFile) throws IOException {
+    private JSONObject doExtractTextFrom(String inputFile) throws IOException, JSONException {
         JSONObject doc = new JSONObject();
 
         File f = new File(inputFile);

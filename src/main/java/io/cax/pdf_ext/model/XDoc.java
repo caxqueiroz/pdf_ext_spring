@@ -1,6 +1,5 @@
 package io.cax.pdf_ext.model;
 
-import io.github.jbellis.jvector.vector.types.VectorFloat;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -21,6 +20,6 @@ public class XDoc {
     private HashMap<String, Object> metadata;
 
     /* The vector representation of the document */
-    private VectorFloat<?> vector;
+    private float[] vector;
 
 }
