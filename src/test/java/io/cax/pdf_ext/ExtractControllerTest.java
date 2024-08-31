@@ -2,7 +2,9 @@ package io.cax.pdf_ext;
 
 import io.cax.pdf_ext.controller.ExtractController;
 import io.cax.pdf_ext.security.JwtTokenProvider;
+import io.cax.pdf_ext.security.JwtTokenProviderException;
 import io.cax.pdf_ext.security.JwtsWrapper;
+import io.cax.pdf_ext.security.SecurityConfig;
 import io.cax.pdf_ext.service.ExtractorEngine;
 import io.jsonwebtoken.Jwts;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -17,20 +19,30 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.ApplicationContextInitializer;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.Import;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.MapPropertySource;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.anyString;
@@ -39,10 +51,21 @@ import static org.springframework.security.test.web.servlet.setup.SecurityMockMv
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@WebMvcTest(ExtractController.class)
+@Import(SecurityConfig.class)
+@ContextConfiguration(initializers = ExtractControllerTest.Initializer.class)
 @ActiveProfiles("test")
 class ExtractControllerTest {
 
-    @Mock
+    static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+        public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
+            ConfigurableEnvironment env = configurableApplicationContext.getEnvironment();
+            Map<String,Object> map = new HashMap<>();
+            map.put("auth_public_key", Base64.getEncoder().encodeToString(keyPair.getPublic().getEncoded()));
+            env.getPropertySources().addFirst(new MapPropertySource("test", map));
+        }
+    }
+    @MockBean
     private ExtractorEngine extractorEngine;
 
     @InjectMocks
@@ -50,7 +73,14 @@ class ExtractControllerTest {
     @Mock
     private JwtsWrapper jwtsWrapper;
 
+    @MockBean
+    private JwtTokenProvider jwtTokenProvider;
+
+    @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private WebApplicationContext webApplicationContext;
 
     private static final KeyPair keyPair = generateKeyPair();
 
@@ -66,9 +96,12 @@ class ExtractControllerTest {
 
     @BeforeEach
     void setUp() {
+
+        ReflectionTestUtils.setField(jwtTokenProvider, "publicKeyValue", Base64.getEncoder().encodeToString(keyPair.getPublic().getEncoded()));
         MockitoAnnotations.openMocks(this);
-        mockMvc = MockMvcBuilders.standaloneSetup(extractController)
-                .apply(springSecurity()) // Apply Spring Security configuration
+        mockMvc = MockMvcBuilders
+                .webAppContextSetup(webApplicationContext)
+                .apply(springSecurity())  // Apply security configuration
                 .build();
     }
 
@@ -89,6 +122,11 @@ class ExtractControllerTest {
         when(extractorEngine.extractTextFrom(anyString())).thenReturn(new JSONObject());
 
         String jwtToken = generateToken("testUser");
+
+
+        // Mock the JwtTokenProvider to return a valid authentication object
+        when(jwtTokenProvider.validate(anyString())).thenReturn(true);
+        when(jwtTokenProvider.getAuthentication(anyString())).thenReturn(new UsernamePasswordAuthenticationToken("testUser", null, Collections.emptyList()));
 
         mockMvc.perform(multipart("/extract/upload")
                         .file(file)
@@ -152,7 +190,7 @@ class ExtractControllerTest {
         // Pass an invalid key spec
         String invalidKeySpec = "invalidKeySpec";
 
-        assertThrows(RuntimeException.class, () -> {
+        assertThrows(JwtTokenProviderException.class, () -> {
             jwtTokenProvider.getAuthentication(invalidKeySpec);
         });
     }

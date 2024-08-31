@@ -4,6 +4,7 @@ package io.cax.pdf_ext.security;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.SignatureException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -11,7 +12,6 @@ import org.springframework.stereotype.Component;
 
 import java.security.KeyFactory;
 import java.security.PublicKey;
-import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import java.util.logging.Logger;
@@ -26,6 +26,7 @@ public class JwtTokenProvider {
 
     private final JwtsWrapper jwtsWrapper;
 
+    @Autowired
     public JwtTokenProvider(JwtsWrapper jwtsWrapper) {
         this.jwtsWrapper = jwtsWrapper;
     }
@@ -59,24 +60,21 @@ public class JwtTokenProvider {
      * Get the public key from the configuration.
      * @return The public key.
      */
-    private PublicKey getPublicKey() throws InvalidKeySpecException {
+    private PublicKey getPublicKey() throws JwtTokenProviderException {
         try {
 
             byte[] byteKey = Base64.getDecoder().decode(publicKeyValue.getBytes());
-            X509EncodedKeySpec X509publicKey = new X509EncodedKeySpec(byteKey);
+            X509EncodedKeySpec x509EncodedKeySpec = new X509EncodedKeySpec(byteKey);
             KeyFactory kf = KeyFactory.getInstance("RSA");
-            return kf.generatePublic(X509publicKey);
+            return kf.generatePublic(x509EncodedKeySpec);
 
-        } catch(InvalidKeySpecException e){
-            logger.severe(e.getMessage());
-            throw e;
         } catch (Exception e) {
-            logger.severe(e.getMessage());
-            throw new RuntimeException(e);
+            logger.severe("Error while getting public key");
+            throw new JwtTokenProviderException("Error while getting public key: " + e.getMessage(), e);
         }
     }
 
-    public Authentication getAuthentication(String token) {
+    public Authentication getAuthentication(String token) throws JwtTokenProviderException {
         // Parse the token and get the claims
         String username = null;
         try {
@@ -87,10 +85,9 @@ public class JwtTokenProvider {
                     .parseSignedClaims(token);
             username = claims.getPayload().get("username", String.class);
 
-        } catch (InvalidKeySpecException e) {
-            throw new RuntimeException(e);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            logger.severe("Error while parsing token");
+            throw new JwtTokenProviderException("Error while parsing token: " + e.getMessage() , e);
         }
 
 
