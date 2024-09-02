@@ -1,5 +1,6 @@
 package io.cax.pdf_ext;
 
+import io.cax.pdf_ext.exception.EmbedderException;
 import io.cax.pdf_ext.exception.VectorSearchException;
 import io.cax.pdf_ext.model.Session;
 import io.cax.pdf_ext.model.XDoc;
@@ -68,11 +69,14 @@ public class VectorSearchTest {
         sessionId = UUID.randomUUID();
         document = new XDoc();
         document.setDocTitle("Title 1");
+        document.setTotalPages(1);
+
         XPage xPage = new XPage();
         xPage.setPageNumber(1);
         xPage.setText("similarityFunctionName");
         xPage.setVector(new float[]{1.0f, 2.0f, 3.0f});
         List<XPage> listOfPages = new ArrayList<>();
+        listOfPages.add(xPage);  // Add the page to the list
         document.setPages(listOfPages);
         documents = new ArrayList<>();
         documents.add(document);
@@ -101,7 +105,7 @@ public class VectorSearchTest {
     }
 
     @Test
-    void testSearch_Success() throws VectorSearchException, IOException, JSONException {
+    void testSearch_Success() throws VectorSearchException, IOException, JSONException, EmbedderException {
 
         when(sessionService.sessionExists(sessionId)).thenReturn(true);
         Session session = mock(Session.class);
@@ -109,12 +113,8 @@ public class VectorSearchTest {
         when(session.getDocuments()).thenReturn(documents);
 
 
-        var v =new float[512];
-        try {
-            when(embedderService.embed("query")).thenReturn(v);
-        } catch (io.cax.pdf_ext.exception.EmbedderException e) {
-            throw new RuntimeException(e);
-        }
+        var v = new float[3];
+        when(embedderService.embed("query")).thenReturn(v);
         JSONObject result = vectorSearch.search(sessionId, "query");
 
         assertNotNull(result);

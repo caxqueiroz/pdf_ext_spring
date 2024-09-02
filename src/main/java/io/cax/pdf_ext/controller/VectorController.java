@@ -6,6 +6,7 @@ import io.cax.pdf_ext.service.ExtractorEngine;
 import io.cax.pdf_ext.service.VectorSearch;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -52,8 +53,8 @@ public class VectorController {
             var xDoc = XDoc.fromText(document);
             var docId = vectorService.addDocument(UUID.fromString(sessionId), xDoc);
             return new ResponseEntity<>(docId.toString(), HttpStatus.OK);
-        } catch (VectorSearchException ve) {
-            return new ResponseEntity<>("An error occurred while adding the document: " + ve.getMessage() + "!", HttpStatus.BAD_REQUEST);
+        } catch (VectorSearchException | JSONException e) {
+            return new ResponseEntity<>("An error occurred while adding the document: " + e.getMessage() + "!", HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             return new ResponseEntity<>("An error occurred while adding the document: " + document + "!", HttpStatus.INTERNAL_SERVER_ERROR);
         }

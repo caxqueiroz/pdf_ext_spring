@@ -14,11 +14,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.stereotype.Service;
 
-
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.UUID;
 import java.util.logging.Logger;
 
 /**
@@ -100,8 +98,7 @@ public class ExtractorEngine {
                         .put(NameUtils.PAGE_TEXT, pageText));
                 }
                 doc.put(NameUtils.DOC_PAGES, pages);
-                
-                xDoc.setMetadata(convertToMetadata(doc));
+
                 successfulExtractsCounter.increment();
                 return xDoc;
             } catch (IOException e) {
@@ -163,7 +160,7 @@ public class ExtractorEngine {
     private String getTitle(PDDocument pdDocument) throws IOException {
         String title = pdDocument.getDocumentInformation().getTitle();
         if (title != null && !title.isEmpty()) {
-            return title.replace("\n", " ");
+            return title.replace("\n", "");
         }
         PDFTextStripper pdfTextStripper = new PDFTextStripper();
         pdfTextStripper.setStartPage(1);
@@ -175,9 +172,9 @@ public class ExtractorEngine {
     // converte from JSONObject tags to Metadata
     private HashMap<String, Object> convertToMetadata(JSONObject doc) {
         HashMap<String, Object> metadata = new HashMap<>();
-        metadata.put("pages", doc.get("total_pages"));
-        metadata.put("filename", doc.get("filename"));
-        metadata.put("doc_title", doc.get("doc_title"));
+        metadata.put(NameUtils.DOC_TOTAL_PAGES, doc.get(NameUtils.DOC_TOTAL_PAGES));
+        metadata.put(NameUtils.DOC_FILENAME, doc.get(NameUtils.DOC_FILENAME));
+        metadata.put(NameUtils.DOC_TITLE, doc.get(NameUtils.DOC_TITLE));
         return metadata;
     }
 }

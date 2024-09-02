@@ -41,11 +41,14 @@ public class XPage {
             json.put(NameUtils.PAGE_NUMBER, this.pageNumber);
             json.put(NameUtils.PAGE_TEXT, this.text);
             // Convert vector array to JSONArray
-            var vectorArray = new JSONArray();
-            for (float v : this.vector) {
-             vectorArray.put(v);
+            if (this.vector != null) {
+                var vectorArray = new JSONArray();
+                for (float v : this.vector) {
+                    vectorArray.put(v);
+                }
+                json.put(NameUtils.PAGE_VECTOR, vectorArray);
             }
-            json.put(NameUtils.PAGE_VECTOR, vectorArray);
+
             return json; 
         } catch (JSONException e) {
             throw new JSONException("Error parsing JSON string: " + e.getMessage());
@@ -54,21 +57,24 @@ public class XPage {
 
     /**
      * 
-     * @param pagJsonObject
-     * @return
-     * @throws JSONException
+     * @param pagJsonObject - JSON object of a page
+     * @return XPage object
+     * @throws JSONException if there is an error during JSON conversion
      */
     public static XPage fromJSON(JSONObject pagJsonObject) throws JSONException {
         var xPage = new XPage();
         try {
             xPage.setPageNumber(pagJsonObject.getInt(NameUtils.PAGE_NUMBER));
             xPage.setText(pagJsonObject.getString(NameUtils.PAGE_TEXT));
-            var vectorArray = pagJsonObject.getJSONArray(NameUtils.PAGE_VECTOR);
-            float[] vector = new float[vectorArray.length()];
-            for (int i = 0; i < vectorArray.length(); i++) {
-                vector[i] = (float) vectorArray.getDouble(i);
+            if (pagJsonObject.has(NameUtils.PAGE_VECTOR)) {
+                var vectorArray = pagJsonObject.getJSONArray(NameUtils.PAGE_VECTOR);
+                float[] vector = new float[vectorArray.length()];
+                for (int i = 0; i < vectorArray.length(); i++) {
+                    vector[i] = (float) vectorArray.getDouble(i);
+                }
+                xPage.setVector(vector);
             }
-            xPage.setVector(vector);
+
         } catch (JSONException e) {
             throw new JSONException("Error parsing JSON string: " + e.getMessage());
         }

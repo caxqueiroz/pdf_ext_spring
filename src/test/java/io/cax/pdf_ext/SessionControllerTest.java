@@ -1,50 +1,83 @@
 package io.cax.pdf_ext;
-
 import io.cax.pdf_ext.controller.SessionController;
 import io.cax.pdf_ext.service.SessionService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
+
 import static org.mockito.Mockito.*;
 
-/**
- * SessionControllerTest is a test class for the SessionController.
- */
-public class SessionControllerTest {
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-    @Mock
+@WebMvcTest(SessionController.class)
+class SessionControllerTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @MockBean
     private SessionService sessionService;
 
-    private SessionController sessionController;
-
     @BeforeEach
-    public void setup() {
-        MockitoAnnotations.openMocks(this);
-        sessionController = new SessionController(sessionService);
+    public void setup(WebApplicationContext webApplicationContext) {
+        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
     }
 
-    /**
-     * Test the createSession method.
-     */
     @Test
-    public void testCreateSession() {
+    void testCreateSession() throws Exception {
         UUID mockSessionId = UUID.randomUUID();
         when(sessionService.createSession()).thenReturn(mockSessionId);
 
-        ResponseEntity<String> response = sessionController.createSession();
+        mockMvc.perform(post("/session/start"))
+                .andExpect(status().isCreated())
+                .andExpect(content().string(mockSessionId.toString()));
 
-        assertEquals(HttpStatus.CREATED, response.getStatusCode());
-        assertEquals(mockSessionId, response.getBody());
         verify(sessionService, times(1)).createSession();
     }
 
+    @Test
+    void testCheckSessionId() throws Exception {
+        UUID mockSessionId = UUID.randomUUID();
+        when(sessionService.sessionExists(mockSessionId)).thenReturn(true);
 
+        mockMvc.perform(get("/session/{id}", mockSessionId))
+                .andExpect(status().isOk())
+                .andExpect(content().string(mockSessionId.toString()));
+
+        verify(sessionService, times(1)).sessionExists(mockSessionId);
+    }
+
+    @Test
+    void testCheckSessionIdNotFound() throws Exception {
+        UUID mockSessionId = UUID.randomUUID();
+        when(sessionService.sessionExists(mockSessionId)).thenReturn(false);
+
+        mockMvc.perform(get("/session/{id}", mockSessionId))
+                .andExpect(status().isNotFound());
+
+        verify(sessionService, times(1)).sessionExists(mockSessionId);
+    }
+
+    @Test
+    void testEndSession() throws Exception {
+        UUID mockSessionId = UUID.randomUUID();
+        when(sessionService.sessionExists(mockSessionId)).thenReturn(true);
+
+        mockMvc.perform(put("/session/end/{id}", mockSessionId))
+                .andExpect(status().isOk());
+
+        verify(sessionService, times(1)).endSession(mockSessionId);
+    }
 }

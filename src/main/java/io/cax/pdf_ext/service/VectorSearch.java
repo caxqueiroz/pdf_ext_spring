@@ -88,7 +88,7 @@ public class VectorSearch {
             throw new VectorSearchException("Session does not exist!");
         }
         if (processedPages.get() != document.getTotalPages()){
-            throw new VectorSearchException("%d pages have not been processed");
+            throw new VectorSearchException(String.format("Only %d out of %d pages were processed", processedPages.get(), document.getTotalPages()));
         }
         return document.getId();
 
@@ -103,7 +103,9 @@ public class VectorSearch {
     public JSONObject search(UUID sessionId, String query) throws VectorSearchException, JSONException, IOException {
 
         if (sessionService.sessionExists(sessionId)) {
-
+            if (query == null || query.isEmpty()) {
+                throw new VectorSearchException("Query is empty!");
+            }
             var session = sessionService.getSession(sessionId);
             float[] embeddedQuery = null;
             try {
@@ -116,6 +118,11 @@ public class VectorSearch {
             .map(xPage -> xPage.getVector()) 
             .map(vts::createFloatVector) // Create a float vector
             .collect(Collectors.toList());
+
+            if (vectorArray.isEmpty()) {
+                throw new VectorSearchException("No documents to search!");
+            }
+
             int originalDimension = vectorArray.get(0).length();
             RandomAccessVectorValues ravv = new ListRandomAccessVectorValues(vectorArray, originalDimension);
             var vQuery= vts.createFloatVector(embeddedQuery);

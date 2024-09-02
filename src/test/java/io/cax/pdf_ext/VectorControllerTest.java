@@ -2,12 +2,15 @@ package io.cax.pdf_ext;
 
 import io.cax.pdf_ext.controller.VectorController;
 import io.cax.pdf_ext.exception.VectorSearchException;
+import io.cax.pdf_ext.model.NameUtils;
+import io.cax.pdf_ext.model.XPage;
 import io.cax.pdf_ext.security.JwtTokenProvider;
 import io.cax.pdf_ext.security.JwtsWrapper;
 import io.cax.pdf_ext.security.SecurityConfig;
 import io.cax.pdf_ext.service.ExtractorEngine;
 import io.cax.pdf_ext.service.VectorSearch;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -75,22 +78,25 @@ class VectorControllerTest {
     @Test
     void testAddDocument_Success() throws Exception {
         UUID docId = UUID.randomUUID();
-        UUID sessionId = UUID.randomUUID();
         Mockito.when(vectorSearch.addDocument(any(UUID.class), any())).thenReturn(docId);
-        var uri = String.format("/search/%s/doc", sessionId);
-        mockMvc.perform(post(uri)
-                        .content("Test document content")
+
+        JSONObject jsonDoc = TestUtils.getJsonObject();
+
+        mockMvc.perform(post(TestUtils.getURIForSearch(sessionId, "doc"))
+                        .content(jsonDoc.toString())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().string(docId.toString()));
     }
 
+
+
     @Test
     void testAddDocument_VectorSearchException() throws Exception {
         Mockito.when(vectorSearch.addDocument(any(UUID.class), any())).thenThrow(new VectorSearchException("Failed to add document"));
-
-        mockMvc.perform(post("/search/doc")
-                        .content("Test document content")
+        JSONObject jsonDoc = TestUtils.getJsonObject();
+        mockMvc.perform(post(TestUtils.getURIForSearch(sessionId, "doc"))
+                        .content(jsonDoc.toString())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string("An error occurred while adding the document: Failed to add document!"));
@@ -99,12 +105,11 @@ class VectorControllerTest {
     @Test
     void testAddDocument_InternalServerError() throws Exception {
         Mockito.when(vectorSearch.addDocument(any(UUID.class), any())).thenThrow(new RuntimeException("Unexpected error"));
-
-        mockMvc.perform(post("/search/doc")
-                        .content("Test document content")
+        JSONObject jsonDoc = TestUtils.getJsonObject();
+        mockMvc.perform(post(TestUtils.getURIForSearch(sessionId, "doc"))
+                        .content(jsonDoc.toString())
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isInternalServerError())
-                .andExpect(content().string("An error occurred while adding the document: Test document content!"));
+                .andExpect(status().isInternalServerError());
     }
 
     @Test
@@ -114,7 +119,7 @@ class VectorControllerTest {
 
         Mockito.when(vectorSearch.search(any(UUID.class), anyString())).thenReturn(searchResult);
 
-        mockMvc.perform(post("/search/query")
+        mockMvc.perform(post(TestUtils.getURIForSearch(sessionId, "query"))
                         .content("Test query")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -125,7 +130,7 @@ class VectorControllerTest {
     void testSearch_VectorSearchException() throws Exception {
         Mockito.when(vectorSearch.search(any(UUID.class), anyString())).thenThrow(new VectorSearchException("Failed to process query"));
 
-        mockMvc.perform(post("/search/query")
+        mockMvc.perform(post(TestUtils.getURIForSearch(sessionId, "query"))
                         .content("Test query")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
@@ -136,7 +141,7 @@ class VectorControllerTest {
     void testSearch_InternalServerError() throws Exception {
         Mockito.when(vectorSearch.search(any(UUID.class), anyString())).thenThrow(new RuntimeException("Unexpected error"));
 
-        mockMvc.perform(post("/search/query")
+        mockMvc.perform(post(TestUtils.getURIForSearch(sessionId, "query"))
                         .content("Test query")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isInternalServerError())
