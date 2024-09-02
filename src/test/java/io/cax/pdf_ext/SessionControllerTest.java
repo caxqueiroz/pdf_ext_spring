@@ -1,4 +1,5 @@
 package io.cax.pdf_ext;
+
 import io.cax.pdf_ext.controller.SessionController;
 import io.cax.pdf_ext.service.SessionService;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,12 +13,8 @@ import org.springframework.web.context.WebApplicationContext;
 
 import java.util.UUID;
 
-
 import static org.mockito.Mockito.*;
-
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 

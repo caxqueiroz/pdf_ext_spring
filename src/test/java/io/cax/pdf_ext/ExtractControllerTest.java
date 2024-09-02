@@ -7,7 +7,6 @@ import io.cax.pdf_ext.security.JwtsWrapper;
 import io.cax.pdf_ext.security.SecurityConfig;
 import io.cax.pdf_ext.service.ExtractorEngine;
 import io.jsonwebtoken.Jwts;
-
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,7 +30,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-
 
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;

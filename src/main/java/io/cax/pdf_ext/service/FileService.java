@@ -1,14 +1,12 @@
 package io.cax.pdf_ext.service;
 
-import java.util.logging.Logger;
-
-import org.json.JSONObject;
+import io.cax.pdf_ext.exception.FileServiceException;
+import io.cax.pdf_ext.model.XDoc;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import io.cax.pdf_ext.exception.FileServiceException;
-import io.cax.pdf_ext.model.XDoc;
+import java.util.logging.Logger;
 
 /**
  * FileService is a service that manages file operations.   

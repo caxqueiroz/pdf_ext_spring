@@ -1,8 +1,5 @@
 package io.cax.pdf_ext;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-
 import io.cax.pdf_ext.model.NameUtils;
 import io.cax.pdf_ext.model.XPage;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -13,6 +10,9 @@ import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
 import org.json.JSONArray;
 import org.json.JSONObject;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 
 public class TestUtils {
 

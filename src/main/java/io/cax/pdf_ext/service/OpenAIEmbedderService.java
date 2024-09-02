@@ -1,5 +1,6 @@
 package io.cax.pdf_ext.service;
 
+import io.cax.pdf_ext.exception.EmbedderException;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
@@ -9,8 +10,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-
-import io.cax.pdf_ext.exception.EmbedderException;
 
 /**
  * OpenAIEmbedderService is a service that embeds text using the OpenAI API.

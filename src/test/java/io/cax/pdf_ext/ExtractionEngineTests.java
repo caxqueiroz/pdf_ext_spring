@@ -5,9 +5,8 @@ import io.cax.pdf_ext.model.XDoc;
 import io.cax.pdf_ext.service.ExtractorEngine;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
-import org.junit.jupiter.api.Test;
-
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
