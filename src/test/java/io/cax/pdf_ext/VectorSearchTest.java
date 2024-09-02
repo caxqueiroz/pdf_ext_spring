@@ -1,11 +1,12 @@
 package io.cax.pdf_ext;
 
+import io.cax.pdf_ext.exception.VectorSearchException;
 import io.cax.pdf_ext.model.Session;
 import io.cax.pdf_ext.model.XDoc;
+import io.cax.pdf_ext.model.XPage;
 import io.cax.pdf_ext.service.OpenAIEmbedderService;
 import io.cax.pdf_ext.service.SessionService;
 import io.cax.pdf_ext.service.VectorSearch;
-import io.cax.pdf_ext.service.VectorSearchException;
 import io.github.jbellis.jvector.vector.VectorUtil;
 import io.github.jbellis.jvector.vector.VectorizationProvider;
 import io.github.jbellis.jvector.vector.types.VectorFloat;
@@ -66,8 +67,13 @@ public class VectorSearchTest {
     public void setUp() {
         sessionId = UUID.randomUUID();
         document = new XDoc();
-        document.setContent("content");
-        document.setVector(new float[512]);
+        document.setDocTitle("Title 1");
+        XPage xPage = new XPage();
+        xPage.setPageNumber(1);
+        xPage.setText("similarityFunctionName");
+        xPage.setVector(new float[]{1.0f, 2.0f, 3.0f});
+        List<XPage> listOfPages = new ArrayList<>();
+        document.setPages(listOfPages);
         documents = new ArrayList<>();
         documents.add(document);
 
@@ -106,7 +112,7 @@ public class VectorSearchTest {
         var v =new float[512];
         try {
             when(embedderService.embed("query")).thenReturn(v);
-        } catch (io.cax.pdf_ext.service.EmbedderException e) {
+        } catch (io.cax.pdf_ext.exception.EmbedderException e) {
             throw new RuntimeException(e);
         }
         JSONObject result = vectorSearch.search(sessionId, "query");

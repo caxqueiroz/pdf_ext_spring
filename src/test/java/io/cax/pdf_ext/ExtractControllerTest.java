@@ -7,12 +7,7 @@ import io.cax.pdf_ext.security.JwtsWrapper;
 import io.cax.pdf_ext.security.SecurityConfig;
 import io.cax.pdf_ext.service.ExtractorEngine;
 import io.jsonwebtoken.Jwts;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.PDPage;
-import org.apache.pdfbox.pdmodel.PDPageContentStream;
-import org.apache.pdfbox.pdmodel.font.PDFont;
-import org.apache.pdfbox.pdmodel.font.PDType1Font;
-import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
+
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,8 +32,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
@@ -118,7 +112,7 @@ class ExtractControllerTest {
 
     @Test
     void endpointReturnsOkWithValidJwt() throws Exception {
-        MockMultipartFile file = new MockMultipartFile("file", "test.pdf", "application/pdf", createPdf("test data"));
+        MockMultipartFile file = new MockMultipartFile("file", "test.pdf", "application/pdf", TestUtils.createPdf("test data"));
         when(extractorEngine.extractTextFrom(anyString())).thenReturn(new JSONObject());
 
         String jwtToken = generateToken("testUser");
@@ -139,7 +133,7 @@ class ExtractControllerTest {
     // write a test that generates a invalid JWT token message
     @Test
     void endpointReturnsUnauthorizedWithInvalidJwt() throws Exception {
-        MockMultipartFile file = new MockMultipartFile("file", "test.pdf", "application/pdf", createPdf("test data"));
+        MockMultipartFile file = new MockMultipartFile("file", "test.pdf", "application/pdf", TestUtils.createPdf("test data"));
         when(extractorEngine.extractTextFrom(anyString())).thenReturn(new JSONObject());
 
         String jwtToken = generateToken("testUser");
@@ -154,7 +148,7 @@ class ExtractControllerTest {
     // write a test the generates a expired JWT token message
     @Test
     void endpointReturnsUnauthorizedWithExpiredJwt() throws Exception {
-        MockMultipartFile file = new MockMultipartFile("file", "test.pdf", "application/pdf", createPdf("test data"));
+        MockMultipartFile file = new MockMultipartFile("file", "test.pdf", "application/pdf", TestUtils.createPdf("test data"));
         when(extractorEngine.extractTextFrom(anyString())).thenReturn(new JSONObject());
 
         String jwtToken = Jwts.builder()
@@ -173,7 +167,7 @@ class ExtractControllerTest {
     // write a test where header is null and expect unauthorized
     @Test
     void endpointReturnsUnauthorizedWithNullHeader() throws Exception {
-        MockMultipartFile file = new MockMultipartFile("file", "test.pdf", "application/pdf", createPdf("test data"));
+        MockMultipartFile file = new MockMultipartFile("file", "test.pdf", "application/pdf", TestUtils.createPdf("test data"));
         when(extractorEngine.extractTextFrom(anyString())).thenReturn(new JSONObject());
 
         mockMvc.perform(multipart("/extract/upload")
@@ -204,28 +198,6 @@ class ExtractControllerTest {
                 .signWith(keyPair.getPrivate())
                 .compact();
     }
-
-    public static byte[] createPdf(String content) {
-        ByteArrayOutputStream output = new ByteArrayOutputStream();
-        try (PDDocument document = new PDDocument()) {
-            PDPage page = new PDPage();
-            document.addPage(page);
-            PDFont font = new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD);
-            PDPageContentStream contentStream = new PDPageContentStream(document, page);
-            contentStream.setFont(font, 12);
-            contentStream.beginText();
-            contentStream.newLineAtOffset(100, 700);
-            contentStream.showText(content);
-            contentStream.endText();
-            contentStream.close();
-
-            document.save(output);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        return output.toByteArray();
-    }
-
 
 }
 

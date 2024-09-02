@@ -1,4 +1,4 @@
-package io.cax.pdf_ext.service;
+package io.cax.pdf_ext.exception;
 
 public class SessionServiceException extends Exception {
 

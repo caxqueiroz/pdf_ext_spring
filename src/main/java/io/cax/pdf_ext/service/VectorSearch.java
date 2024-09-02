@@ -1,5 +1,7 @@
 package io.cax.pdf_ext.service;
 
+import io.cax.pdf_ext.exception.EmbedderException;
+import io.cax.pdf_ext.exception.VectorSearchException;
 import io.cax.pdf_ext.model.XDoc;
 import io.github.jbellis.jvector.graph.*;
 import io.github.jbellis.jvector.graph.similarity.BuildScoreProvider;
@@ -19,6 +21,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
@@ -26,7 +30,7 @@ import java.util.stream.Collectors;
  */
 @Service
 public class VectorSearch {
-
+    private static final Logger logger = Logger.getLogger(VectorSearch.class.getName());
     private final static VectorTypeSupport vts = VectorizationProvider.getInstance().getVectorTypeSupport();
 
     /* The top K results to return */
@@ -63,20 +67,28 @@ public class VectorSearch {
      */
     public UUID addDocument(UUID sessionId, XDoc document) throws VectorSearchException {
 
+        AtomicInteger processedPages = new AtomicInteger(0); 
+
         if (sessionService.sessionExists(sessionId)) {
-            float[] embeddedDocument = null;
-            try {
-                embeddedDocument = embedderService.embed(document.getContent());
-            } catch (EmbedderException e) {
-                throw new RuntimeException(e);
-            }
+            
+            document.getPages().forEach(p -> {
+                try {
+                    p.setVector(embedderService.embed(p.getText()));
+                    processedPages.incrementAndGet();
+                } catch (EmbedderException e) {
+                    logger.warning("error creating the embedding for a page");        
+                }
+            });
+
             var session = sessionService.getSession(sessionId);
-            var docId = UUID.randomUUID();
-            document.setId(docId);
-            document.setVector(embeddedDocument);
             session.getDocuments().add(document);
+
         } else {
+            logger.warning("Session does not exist");
             throw new VectorSearchException("Session does not exist!");
+        }
+        if (processedPages.get() != document.getTotalPages()){
+            throw new VectorSearchException("%d pages have not been processed");
         }
         return document.getId();
 
@@ -100,7 +112,10 @@ public class VectorSearch {
                 throw new RuntimeException(e);
             }
             var docs = session.getDocuments();
-            List<VectorFloat<?>> vectorArray = docs.stream().map(XDoc::getVector).map(vts::createFloatVector).collect(Collectors.toList());
+            List<VectorFloat<?>> vectorArray = docs.stream().flatMap(doc -> doc.getPages().stream())
+            .map(xPage -> xPage.getVector()) 
+            .map(vts::createFloatVector) // Create a float vector
+            .collect(Collectors.toList());
             int originalDimension = vectorArray.get(0).length();
             RandomAccessVectorValues ravv = new ListRandomAccessVectorValues(vectorArray, originalDimension);
             var vQuery= vts.createFloatVector(embeddedQuery);

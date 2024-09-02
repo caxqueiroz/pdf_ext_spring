@@ -1,7 +1,7 @@
 package io.cax.pdf_ext;
 
 
-import io.cax.pdf_ext.service.EmbedderException;
+import io.cax.pdf_ext.exception.EmbedderException;
 import io.cax.pdf_ext.service.OpenAIEmbedderService;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;

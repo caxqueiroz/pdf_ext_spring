@@ -1,12 +1,13 @@
 package io.cax.pdf_ext;
 
 import io.cax.pdf_ext.controller.VectorController;
+import io.cax.pdf_ext.exception.VectorSearchException;
 import io.cax.pdf_ext.security.JwtTokenProvider;
 import io.cax.pdf_ext.security.JwtsWrapper;
 import io.cax.pdf_ext.security.SecurityConfig;
 import io.cax.pdf_ext.service.ExtractorEngine;
 import io.cax.pdf_ext.service.VectorSearch;
-import io.cax.pdf_ext.service.VectorSearchException;
+
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,7 +29,6 @@ import org.springframework.web.context.WebApplicationContext;
 import java.util.Base64;
 import java.util.UUID;
 
-import static io.cax.pdf_ext.controller.SessionController.XSESSION;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
@@ -75,11 +75,11 @@ class VectorControllerTest {
     @Test
     void testAddDocument_Success() throws Exception {
         UUID docId = UUID.randomUUID();
+        UUID sessionId = UUID.randomUUID();
         Mockito.when(vectorSearch.addDocument(any(UUID.class), any())).thenReturn(docId);
-
-        mockMvc.perform(post("/search/doc")
+        var uri = String.format("/search/%s/doc", sessionId);
+        mockMvc.perform(post(uri)
                         .content("Test document content")
-                        .header(XSESSION, sessionId)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().string(docId.toString()));
@@ -91,7 +91,6 @@ class VectorControllerTest {
 
         mockMvc.perform(post("/search/doc")
                         .content("Test document content")
-                        .header(XSESSION, sessionId)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string("An error occurred while adding the document: Failed to add document!"));
@@ -103,7 +102,6 @@ class VectorControllerTest {
 
         mockMvc.perform(post("/search/doc")
                         .content("Test document content")
-                        .header(XSESSION, sessionId)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isInternalServerError())
                 .andExpect(content().string("An error occurred while adding the document: Test document content!"));
@@ -118,7 +116,6 @@ class VectorControllerTest {
 
         mockMvc.perform(post("/search/query")
                         .content("Test query")
-                        .header(XSESSION, sessionId)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().json(searchResult.toString()));
@@ -130,7 +127,6 @@ class VectorControllerTest {
 
         mockMvc.perform(post("/search/query")
                         .content("Test query")
-                        .header(XSESSION, sessionId)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string("An error occurred while processing the query: Failed to process query!"));
@@ -142,7 +138,6 @@ class VectorControllerTest {
 
         mockMvc.perform(post("/search/query")
                         .content("Test query")
-                        .header(XSESSION, sessionId)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isInternalServerError())
                 .andExpect(content().string("An error occurred while processing the query: Test query!"));

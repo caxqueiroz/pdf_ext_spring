@@ -6,6 +6,9 @@ import org.springframework.stereotype.Service;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * SessionService is a service that manages user sessions.
+ */
 @Service
 public class SessionService {
 

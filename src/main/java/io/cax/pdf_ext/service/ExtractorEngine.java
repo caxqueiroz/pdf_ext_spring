@@ -1,5 +1,8 @@
 package io.cax.pdf_ext.service;
 
+import io.cax.pdf_ext.exception.DocumentExtractionException;
+import io.cax.pdf_ext.model.NameUtils;
+import io.cax.pdf_ext.model.XDoc;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
@@ -11,10 +14,17 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.stereotype.Service;
 
+
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.UUID;
 import java.util.logging.Logger;
 
+/**
+ * ExtractorEngine is a service that extracts text from a PDF file.
+ * The extracted text is returned as a JSON object.
+ */
 @Service
 public class ExtractorEngine {
 
@@ -56,6 +66,51 @@ public class ExtractorEngine {
                 throw new RuntimeException(e);
             }
         });
+    }
+    /**
+     * Extract text from a PDF file. The extracted text is returned as a JSON object.
+     * @param fileInBytes The PDF byte array to extract text from.
+     * @return a XDoc object containing the extracted text.
+     * @throws DocumentExtractionException If an error occurs while processing the document.
+     */
+    public XDoc extractTextFromPDF(byte[] fileInBytes) throws DocumentExtractionException {
+
+        //check for null 
+        if (fileInBytes == null) {
+            throw new DocumentExtractionException("File is null");
+        }
+        Timer.Sample sample = Timer.start();
+        try {
+            JSONObject doc = new JSONObject();
+            XDoc xDoc = new XDoc();
+            try (PDDocument pdDocument = Loader.loadPDF(fileInBytes)) {
+                xDoc.setDocTitle(getTitle(pdDocument));
+                xDoc.setFilename("file.pdf"); 
+                xDoc.setTotalPages(pdDocument.getNumberOfPages());
+                
+                
+                JSONArray pages = new JSONArray();
+                PDFTextStripper pdfStripper = new PDFTextStripper();
+                for (int i = 1; i <= pdDocument.getNumberOfPages(); i++) {
+                    pdfStripper.setStartPage(i);
+                    pdfStripper.setEndPage(i);
+                    String pageText = pdfStripper.getText(pdDocument);
+                    pages.put(new JSONObject()
+                        .put(NameUtils.PAGE_NUMBER, i)
+                        .put(NameUtils.PAGE_TEXT, pageText));
+                }
+                doc.put(NameUtils.DOC_PAGES, pages);
+                
+                xDoc.setMetadata(convertToMetadata(doc));
+                successfulExtractsCounter.increment();
+                return xDoc;
+            } catch (IOException e) {
+                logger.severe("Error extracting text from PDF: " + e.getMessage());
+                throw new DocumentExtractionException("Error extracting text from PDF", e);
+            }
+        } finally {
+            sample.stop(extractTextFromTimer);
+        }
     }
 
 
@@ -115,5 +170,14 @@ public class ExtractorEngine {
         pdfTextStripper.setEndPage(1);
         String pageText = pdfTextStripper.getText(pdDocument);
         return pageText.replace("\n", " ");
+    }
+
+    // converte from JSONObject tags to Metadata
+    private HashMap<String, Object> convertToMetadata(JSONObject doc) {
+        HashMap<String, Object> metadata = new HashMap<>();
+        metadata.put("pages", doc.get("total_pages"));
+        metadata.put("filename", doc.get("filename"));
+        metadata.put("doc_title", doc.get("doc_title"));
+        return metadata;
     }
 }
