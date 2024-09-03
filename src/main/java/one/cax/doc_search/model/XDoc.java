@@ -4,8 +4,6 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-
-import org.apache.xmlbeans.impl.xb.xsdschema.FieldDocument.Field.Xpath;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -46,9 +44,22 @@ public class XDoc {
         this.id = UUID.randomUUID();
     }
 
+    /**
+     * Converts a JSON string to an XDoc.
+     *
+     * @param document - JSON string
+     * @return XDoc
+     * @throws JSONException
+     */
+    public static XDoc fromText(String document) throws JSONException {
+        var json = new JSONObject(document);
+        var xDoc = new XDoc();
+        xDoc.setDocTitle(json.getString(NameUtils.DOC_TITLE));
+        xDoc.setPages(XPage.fromJSONArray(json.getJSONArray(NameUtils.DOC_PAGES)));
+        return xDoc;
+    }
 
     /**
-     * 
      * @return
      */
     public List<XPage> getPages() {
@@ -56,7 +67,17 @@ public class XDoc {
     }
 
     /**
-     *  returns the number of pages in the document. 
+     * Set the pages of the document.
+     *
+     * @param pagesList
+     */
+    public void setPages(List<XPage> pagesList) {
+        this.pages.set(pagesList != null ? new ArrayList<>(pagesList) : new ArrayList<>());
+    }
+
+    /**
+     * returns the number of pages in the document.
+     *
      * @return
      */
     public int getTotalPages() {
@@ -64,25 +85,17 @@ public class XDoc {
     }
 
     /**
-     * Set the pages of the document. 
-     * @param pagesList
-     */
-    public void setPages(List<XPage> pagesList) {
-        this.pages.set(pagesList != null ? new ArrayList<>(pagesList) : new ArrayList<>());
-    }
-    
-
-    /**
      * Converts the XDoc to a JSONObject.
+     *
      * @return JSONObject, or null if the string is not a valid JSON
-    */
+     */
     public JSONObject toJSON() throws JSONException {
         try {
             var json = new JSONObject();
             json.put(NameUtils.DOC_TITLE, this.getDocTitle());
             json.put(NameUtils.DOC_FILENAME, this.getFilename());
             json.put(NameUtils.DOC_TOTAL_PAGES, this.getTotalPages());
-            
+
             var jsonArray = new JSONArray();
             if (pages != null) {
                 for (XPage page : pages.get()) {
@@ -90,24 +103,10 @@ public class XDoc {
                 }
             }
             json.put(NameUtils.DOC_PAGES, jsonArray);
-            return json; 
+            return json;
         } catch (JSONException e) {
             throw new JSONException("Error parsing JSON string: " + e.getMessage());
         }
-    }
-
-    /**
-     * Converts a JSON string to an XDoc.
-     * @param document - JSON string
-     * @return XDoc
-     * @throws JSONException
-     */
-    public static XDoc fromText(String document) throws JSONException {
-       var json = new JSONObject(document);
-        var xDoc = new XDoc();
-        xDoc.setDocTitle(json.getString(NameUtils.DOC_TITLE));
-        xDoc.setPages(XPage.fromJSONArray(json.getJSONArray(NameUtils.DOC_PAGES)));
-        return xDoc;
     }
 
 

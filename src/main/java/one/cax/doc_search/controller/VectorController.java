@@ -1,11 +1,11 @@
 package one.cax.doc_search.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import one.cax.doc_search.exception.VectorSearchException;
 import one.cax.doc_search.model.XDoc;
 import one.cax.doc_search.service.ExtractorEngine;
 import one.cax.doc_search.service.VectorSearch;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,17 +23,15 @@ import java.util.UUID;
 @Tag(name = "VectorController", description = "Controller for vector search operations")
 public class VectorController {
 
+    private final ExtractorEngine extractorEngine;
     @Value("${doc_ext_search.temp_folder}")
     private String tempFolder;
-
-    private final ExtractorEngine extractorEngine;
+    private VectorSearch vectorService;
 
     @Autowired
     public VectorController(ExtractorEngine extractorEngine) {
         this.extractorEngine = extractorEngine;
     }
-
-    private VectorSearch vectorService;
 
     @Autowired
     public void setVectorService(VectorSearch vectorService) {
@@ -42,7 +40,8 @@ public class VectorController {
 
     /**
      * Add a document to the vector space.
-     * @param document - document to add
+     *
+     * @param document  - document to add
      * @param sessionId - session id
      * @return
      */
@@ -62,8 +61,9 @@ public class VectorController {
 
     /**
      * Upload a document to the vector space.
-     * @param file - file to upload
-     * @param sessionId - session id    
+     *
+     * @param file      - file to upload
+     * @param sessionId - session id
      * @return - response entity
      */
     @PostMapping("/{sessionId}/upload")
@@ -74,7 +74,7 @@ public class VectorController {
                 return new ResponseEntity<>("Please select a file!", HttpStatus.OK);
             }
 
-            
+
             var xDoc = extractorEngine.extractTextFromPDF(file.getBytes());
             var docId = vectorService.addDocument(UUID.fromString(sessionId), xDoc);
             return new ResponseEntity<>(docId.toString(), HttpStatus.OK);
@@ -85,6 +85,7 @@ public class VectorController {
 
     /**
      * Search for a query in the vector space.
+     *
      * @param query - query to search
      * @return - response entity
      */

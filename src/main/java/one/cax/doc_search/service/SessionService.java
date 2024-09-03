@@ -24,6 +24,7 @@ public class SessionService {
 
     /**
      * Get the session
+     *
      * @param sessionId - the session id
      * @return - the session as UUID
      */
@@ -33,6 +34,7 @@ public class SessionService {
 
     /**
      * Check if the session exists
+     *
      * @param sessionId - the session id
      * @return - true if the session exists, false otherwise
      */
@@ -42,6 +44,7 @@ public class SessionService {
 
     /**
      * Create a new session
+     *
      * @return - the session id
      */
     public UUID createSession() {
@@ -54,6 +57,7 @@ public class SessionService {
 
     /**
      * Ends the current user session. Removes the session from the repository.
+     *
      * @param uuid - the session id
      */
     public void endSession(UUID uuid) {

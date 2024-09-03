@@ -25,33 +25,6 @@ public class XPage {
     private float[] vector;
 
     /**
-     * Converts the XPage object to a JSONObject.
-     * 
-     * @return JSONObject representation of the XPage object
-     * @throws JSONException if there is an error during JSON conversion
-     */
-    public JSONObject toJSON() throws JSONException {
-        try {
-            var json = new JSONObject();
-            json.put(NameUtils.PAGE_NUMBER, this.pageNumber);
-            json.put(NameUtils.PAGE_TEXT, this.text);
-            // Convert vector array to JSONArray
-            if (this.vector != null) {
-                var vectorArray = new JSONArray();
-                for (float v : this.vector) {
-                    vectorArray.put(v);
-                }
-                json.put(NameUtils.PAGE_VECTOR, vectorArray);
-            }
-
-            return json; 
-        } catch (JSONException e) {
-            throw new JSONException("Error parsing JSON string: " + e.getMessage());
-        }
-    }
-
-    /**
-     * 
      * @param pagJsonObject - JSON object of a page
      * @return XPage object
      * @throws JSONException if there is an error during JSON conversion
@@ -78,8 +51,9 @@ public class XPage {
 
     /**
      * Converts a JSON array to a list of XPages.
+     *
      * @param pagJsonArray - JSON array of pages
-     * @return list of XPages   
+     * @return list of XPages
      * @throws JSONException
      */
     public static List<XPage> fromJSONArray(JSONArray pagJsonArray) throws JSONException {
@@ -88,6 +62,32 @@ public class XPage {
             xPages.add(XPage.fromJSON(pagJsonArray.getJSONObject(i)));
         }
         return xPages;
+    }
+
+    /**
+     * Converts the XPage object to a JSONObject.
+     *
+     * @return JSONObject representation of the XPage object
+     * @throws JSONException if there is an error during JSON conversion
+     */
+    public JSONObject toJSON() throws JSONException {
+        try {
+            var json = new JSONObject();
+            json.put(NameUtils.PAGE_NUMBER, this.pageNumber);
+            json.put(NameUtils.PAGE_TEXT, this.text);
+            // Convert vector array to JSONArray
+            if (this.vector != null) {
+                var vectorArray = new JSONArray();
+                for (float v : this.vector) {
+                    vectorArray.put(v);
+                }
+                json.put(NameUtils.PAGE_VECTOR, vectorArray);
+            }
+
+            return json;
+        } catch (JSONException e) {
+            throw new JSONException("Error parsing JSON string: " + e.getMessage());
+        }
     }
 
 }

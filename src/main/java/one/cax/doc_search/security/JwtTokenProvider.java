@@ -20,11 +20,9 @@ import java.util.logging.Logger;
 public class JwtTokenProvider {
 
     private final Logger logger = Logger.getLogger(JwtTokenProvider.class.getName());
-
+    private final JwtsWrapper jwtsWrapper;
     @Value("${auth_public_key}")
     private String publicKeyValue;
-
-    private final JwtsWrapper jwtsWrapper;
 
     @Autowired
     public JwtTokenProvider(JwtsWrapper jwtsWrapper) {
@@ -33,6 +31,7 @@ public class JwtTokenProvider {
 
     /**
      * Validate the JWT token.
+     *
      * @param token The token to validate.
      * @return True if the token is valid, false otherwise.
      */
@@ -45,19 +44,20 @@ public class JwtTokenProvider {
                     .getPayload();
             return true;
         } catch (ExpiredJwtException e) {
-                logger.severe("Expired JWT token");
-                return false;
-            } catch (SignatureException e) {
-                logger.severe("Invalid JWT signature");
-                return false;
-            } catch (Exception e) {
-                logger.severe("exception while validation token: " + e.getMessage());
-                return false;
-            }
+            logger.severe("Expired JWT token");
+            return false;
+        } catch (SignatureException e) {
+            logger.severe("Invalid JWT signature");
+            return false;
+        } catch (Exception e) {
+            logger.severe("exception while validation token: " + e.getMessage());
+            return false;
+        }
     }
 
     /**
      * Get the public key from the configuration.
+     *
      * @return The public key.
      */
     private PublicKey getPublicKey() throws JwtTokenProviderException {
@@ -87,7 +87,7 @@ public class JwtTokenProvider {
 
         } catch (Exception e) {
             logger.severe("Error while parsing token");
-            throw new JwtTokenProviderException("Error while parsing token: " + e.getMessage() , e);
+            throw new JwtTokenProviderException("Error while parsing token: " + e.getMessage(), e);
         }
 
 

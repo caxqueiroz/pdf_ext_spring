@@ -21,6 +21,7 @@ public class Session {
 
     /**
      * Sets the session ID.
+     *
      * @param sessionId The UUID to set as the session ID.
      */
     public void setSessionId(UUID sessionId) {

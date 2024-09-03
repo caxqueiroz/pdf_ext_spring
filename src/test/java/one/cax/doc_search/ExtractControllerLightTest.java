@@ -6,7 +6,6 @@ import one.cax.doc_search.exception.FileServiceException;
 import one.cax.doc_search.model.XDoc;
 import one.cax.doc_search.service.ExtractorEngine;
 import one.cax.doc_search.service.FileService;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;

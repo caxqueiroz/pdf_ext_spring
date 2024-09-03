@@ -1,5 +1,6 @@
 package one.cax.doc_search;
 
+import io.jsonwebtoken.Jwts;
 import one.cax.doc_search.controller.ExtractController;
 import one.cax.doc_search.model.XDoc;
 import one.cax.doc_search.security.JwtTokenProvider;
@@ -8,7 +9,6 @@ import one.cax.doc_search.security.JwtsWrapper;
 import one.cax.doc_search.security.SecurityConfig;
 import one.cax.doc_search.service.ExtractorEngine;
 import one.cax.doc_search.service.FileService;
-import io.jsonwebtoken.Jwts;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -50,16 +50,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 class ExtractControllerTest {
 
-    static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-        public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
-            ConfigurableEnvironment env = configurableApplicationContext.getEnvironment();
-            Map<String, Object> map = new HashMap<>();
-            map.put("auth_public_key", Base64.getEncoder().encodeToString(keyPair.getPublic().getEncoded()));
-            env.getPropertySources().addFirst(new MapPropertySource("test", map));
-        }
-    }
-
-
+    private static final KeyPair keyPair = generateKeyPair();
     @MockBean
     private FileService fileService;
 
@@ -80,8 +71,6 @@ class ExtractControllerTest {
     @Autowired
     private WebApplicationContext webApplicationContext;
 
-    private static final KeyPair keyPair = generateKeyPair();
-
     private static KeyPair generateKeyPair() {
         try {
             KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
@@ -90,6 +79,15 @@ class ExtractControllerTest {
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static String generateToken(String username) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("username", username);
+        return Jwts.builder()
+                .claims(claims)
+                .signWith(keyPair.getPrivate())
+                .compact();
     }
 
     @BeforeEach
@@ -197,14 +195,13 @@ class ExtractControllerTest {
         });
     }
 
-
-    public static String generateToken(String username) {
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("username", username);
-        return Jwts.builder()
-                .claims(claims)
-                .signWith(keyPair.getPrivate())
-                .compact();
+    static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+        public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
+            ConfigurableEnvironment env = configurableApplicationContext.getEnvironment();
+            Map<String, Object> map = new HashMap<>();
+            map.put("auth_public_key", Base64.getEncoder().encodeToString(keyPair.getPublic().getEncoded()));
+            env.getPropertySources().addFirst(new MapPropertySource("test", map));
+        }
     }
 
 }

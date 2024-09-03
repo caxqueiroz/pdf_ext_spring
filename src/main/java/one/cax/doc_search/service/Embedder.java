@@ -9,5 +9,6 @@ import java.util.List;
  */
 public interface Embedder {
     float[] embed(String text) throws EmbedderException;
+
     float[][] embedBatch(List<String> texts) throws EmbedderException;
 }

@@ -1,12 +1,12 @@
 package one.cax.doc_search.service;
 
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
 import one.cax.doc_search.exception.DocumentExtractionException;
 import one.cax.doc_search.model.NameUtils;
 import one.cax.doc_search.model.XDoc;
 import one.cax.doc_search.model.XPage;
-import io.micrometer.core.instrument.Counter;
-import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.Timer;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
@@ -34,6 +34,7 @@ public class ExtractorEngine {
 
     /**
      * Create a new ExtractorEngine.
+     *
      * @param meterRegistry The meter registry to register metrics with.
      */
     public ExtractorEngine(MeterRegistry meterRegistry) {
@@ -50,6 +51,7 @@ public class ExtractorEngine {
 
     /**
      * Extract text from a PDF file. The extracted text is returned as a JSON object.
+     *
      * @param inputFile The path to the PDF file to extract text from.
      * @return A JSON object containing the extracted text.
      * @throws DocumentExtractionException If an error occurs while reading the document.
@@ -62,11 +64,13 @@ public class ExtractorEngine {
                 return result;
             });
         } catch (Exception e) {
-                throw new DocumentExtractionException("Error extracting text from PDF", e);
+            throw new DocumentExtractionException("Error extracting text from PDF", e);
         }
     }
+
     /**
      * Extract text from a PDF file. The extracted text is returned as a JSON object.
+     *
      * @param fileInBytes The PDF byte array to extract text from.
      * @return a XDoc object containing the extracted text.
      * @throws DocumentExtractionException If an error occurs while processing the document.
@@ -79,13 +83,13 @@ public class ExtractorEngine {
         }
         Timer.Sample sample = Timer.start();
         try {
-            
+
             XDoc xDoc = new XDoc();
             try (PDDocument pdDocument = Loader.loadPDF(fileInBytes)) {
                 xDoc.setDocTitle(getTitle(pdDocument));
-                xDoc.setFilename(NameUtils.DEFAULT_FILENAME); 
-                
-                
+                xDoc.setFilename(NameUtils.DEFAULT_FILENAME);
+
+
                 List<XPage> pages = new ArrayList<>();
 
                 PDFTextStripper pdfStripper = new PDFTextStripper();
@@ -97,9 +101,9 @@ public class ExtractorEngine {
                     xPage.setPageNumber(i);
                     xPage.setText(pageText);
                     pages.add(xPage);
-                    
+
                 }
-                
+
                 xDoc.setPages(pages);
                 successfulExtractsCounter.increment();
                 return xDoc;
@@ -154,6 +158,7 @@ public class ExtractorEngine {
     /**
      * Get the title of a PDF document.
      * If the document has a title, it is returned. Otherwise, the title of the first page is returned.
+     *
      * @param pdDocument The PDF document to get the title from.
      * @return The title of the PDF document.
      * @throws IOException If an error occurs while reading the document.
@@ -172,6 +177,7 @@ public class ExtractorEngine {
 
     /**
      * Convert a JSON object to a HashMap.
+     *
      * @param doc The JSON object to convert.
      * @return A HashMap containing the metadata.
      */

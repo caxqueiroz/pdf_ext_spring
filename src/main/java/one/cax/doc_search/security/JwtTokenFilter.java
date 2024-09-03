@@ -20,11 +20,12 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
     /**
      * Filter to check if the request has a valid JWT token
-     * @param request The request to filter
-     * @param response The response to filter
+     *
+     * @param request     The request to filter
+     * @param response    The response to filter
      * @param filterChain The filter chain
      * @throws ServletException If a servlet error occurs
-     * @throws IOException If an I/O error occurs
+     * @throws IOException      If an I/O error occurs
      */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -43,7 +44,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
             } catch (JwtTokenProviderException e) {
                 throw new ServletException(e);
             }
-        }else {
+        } else {
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid JWT token");
             return;
         }

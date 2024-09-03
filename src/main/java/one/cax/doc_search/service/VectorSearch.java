@@ -1,8 +1,5 @@
 package one.cax.doc_search.service;
 
-import one.cax.doc_search.exception.EmbedderException;
-import one.cax.doc_search.exception.VectorSearchException;
-import one.cax.doc_search.model.XDoc;
 import io.github.jbellis.jvector.graph.*;
 import io.github.jbellis.jvector.graph.similarity.BuildScoreProvider;
 import io.github.jbellis.jvector.graph.similarity.SearchScoreProvider;
@@ -11,6 +8,9 @@ import io.github.jbellis.jvector.vector.VectorSimilarityFunction;
 import io.github.jbellis.jvector.vector.VectorizationProvider;
 import io.github.jbellis.jvector.vector.types.VectorFloat;
 import io.github.jbellis.jvector.vector.types.VectorTypeSupport;
+import one.cax.doc_search.exception.EmbedderException;
+import one.cax.doc_search.exception.VectorSearchException;
+import one.cax.doc_search.model.XDoc;
 import one.cax.doc_search.model.XPage;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
+
 
 /**
  * Class that represents the vector search service.
@@ -48,7 +48,6 @@ public class VectorSearch {
     /* The SessionService - manages the user sessions */
     private SessionService sessionService;
 
-
     @Autowired
     public void setEmbedderService(OpenAIEmbedderService embedderService) {
         this.embedderService = embedderService;
@@ -61,23 +60,24 @@ public class VectorSearch {
 
     /**
      * Add a document to the vector space.
+     *
      * @param sessionId - the session id
-     * @param document - the document to add
-     * @throws VectorSearchException - if an error occurs
+     * @param document  - the document to add
      * @return - the document id
+     * @throws VectorSearchException - if an error occurs
      */
     public UUID addDocument(UUID sessionId, XDoc document) throws VectorSearchException {
 
-        AtomicInteger processedPages = new AtomicInteger(0); 
+        AtomicInteger processedPages = new AtomicInteger(0);
 
         if (sessionService.sessionExists(sessionId)) {
-            
+
             document.getPages().forEach(p -> {
                 try {
                     p.setVector(embedderService.embed(p.getText()));
                     processedPages.incrementAndGet();
                 } catch (EmbedderException e) {
-                    logger.warning("error creating the embedding for a page");        
+                    logger.warning("error creating the embedding for a page");
                 }
             });
 
@@ -88,16 +88,18 @@ public class VectorSearch {
             logger.warning("Session does not exist");
             throw new VectorSearchException("Session does not exist!");
         }
-        if (processedPages.get() != document.getTotalPages()){
+        if (processedPages.get() != document.getTotalPages()) {
             throw new VectorSearchException(String.format("Only %d out of %d pages were processed", processedPages.get(), document.getTotalPages()));
         }
         return document.getId();
 
     }
+
     /**
      * Search for a query in the vector space.
+     *
      * @param sessionId - the session id
-     * @param query - the query
+     * @param query     - the query
      * @return - the search result
      * @throws VectorSearchException - if an error occurs
      */
@@ -117,21 +119,21 @@ public class VectorSearch {
             var docs = session.getDocuments();
             List<VectorFloat<?>> vectorArray = new ArrayList<>();
             List<PageInfo> pageInfoList = new ArrayList<>();
-        
+
             for (XDoc doc : docs) {
                 for (XPage page : doc.getPages()) {
                     vectorArray.add(vts.createFloatVector(page.getVector()));
                     pageInfoList.add(new PageInfo(doc.getId(), page.getPageNumber(), page.getText()));
                 }
             }
-            
+
             if (vectorArray.isEmpty()) {
                 throw new VectorSearchException("No documents to search!");
             }
 
             int originalDimension = vectorArray.get(0).length();
             RandomAccessVectorValues ravv = new ListRandomAccessVectorValues(vectorArray, originalDimension);
-            var vQuery= vts.createFloatVector(embeddedQuery);
+            var vQuery = vts.createFloatVector(embeddedQuery);
             BuildScoreProvider bsp = BuildScoreProvider.randomAccessScoreProvider(ravv, VectorSimilarityFunction.valueOf(similarityFunctionName));
 
             try (GraphIndexBuilder builder = new GraphIndexBuilder(bsp, ravv.dimension(), 16, 100, 1.2f, 1.2f)) {
@@ -153,15 +155,16 @@ public class VectorSearch {
 
     /**
      * Convert a search result to a JSON object.
-     * @param sr - the search result
-     * @param docs - the documents
+     *
+     * @param sr   - the search result
+     * @param pageInfoList - the list of page info
      * @return - the JSON object
      */
     private JSONObject convertSearchResult(SearchResult sr, List<PageInfo> pageInfoList) throws JSONException {
 
         JSONObject response = new JSONObject();
         List<JSONObject> results = new ArrayList<>();
-    
+
         for (SearchResult.NodeScore ns : sr.getNodes()) {
             PageInfo pageInfo = pageInfoList.get(ns.node);
             JSONObject result = new JSONObject();
@@ -171,7 +174,7 @@ public class VectorSearch {
             result.put("text", pageInfo.text);
             results.add(result);
         }
-    
+
         response.put("results", results);
         return response;
     }
@@ -180,7 +183,7 @@ public class VectorSearch {
         UUID docId;
         int pageNumber;
         String text;
-    
+
         PageInfo(UUID docId, int pageNumber, String text) {
             this.docId = docId;
             this.pageNumber = pageNumber;

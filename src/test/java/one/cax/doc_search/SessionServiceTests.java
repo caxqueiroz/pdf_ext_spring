@@ -23,7 +23,7 @@ class SessionServiceTests {
         assertNotNull(sessionId);
     }
 
-     @Test
+    @Test
     void testSessionExists() {
         // First, create a session
         UUID sessionId = sessionService.createSession();

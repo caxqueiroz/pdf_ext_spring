@@ -1,10 +1,9 @@
 package one.cax.doc_search.controller;
 
 
-import one.cax.doc_search.exception.FileServiceException;
-
-import one.cax.doc_search.service.FileService;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import one.cax.doc_search.exception.FileServiceException;
+import one.cax.doc_search.service.FileService;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,7 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-
 import java.util.UUID;
 import java.util.logging.Logger;
 
@@ -27,17 +25,14 @@ import java.util.logging.Logger;
 public class ExtractController {
 
     private final Logger logger = Logger.getLogger(ExtractController.class.getName());
-
+    /* The FileService - extracts text from PDFs */
+    private final FileService fileService;
     /* The temporary folder to store the uploaded file */
     @Value("${doc_ext_search.temp_folder}")
     private String tempFolder;
-
     /* Whether to process the file in memory */
     @Value("${doc_ext_search.file_inmem_processing}")
     private boolean fileInMemProcessing;
-
-    /* The FileService - extracts text from PDFs */
-    private final FileService fileService;
 
 
     @Autowired
@@ -47,6 +42,7 @@ public class ExtractController {
 
     /**
      * Extract text from a file
+     *
      * @param file - the file to extract text from
      * @return the extracted text
      */

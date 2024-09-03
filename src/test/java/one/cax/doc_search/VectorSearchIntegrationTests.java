@@ -1,26 +1,22 @@
 package one.cax.doc_search;
 
+import one.cax.doc_search.exception.VectorSearchException;
+import one.cax.doc_search.model.XDoc;
+import one.cax.doc_search.model.XPage;
+import one.cax.doc_search.service.OpenAIEmbedderService;
+import one.cax.doc_search.service.SessionService;
+import one.cax.doc_search.service.VectorSearch;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 
-
-import one.cax.doc_search.exception.EmbedderException;
-import one.cax.doc_search.exception.VectorSearchException;
-import one.cax.doc_search.service.OpenAIEmbedderService;
-import one.cax.doc_search.service.SessionService;
-import one.cax.doc_search.service.VectorSearch;
-import one.cax.doc_search.model.XDoc;
-import one.cax.doc_search.model.XPage;
-
 import java.util.Arrays;
 import java.util.UUID;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -29,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @Import(TestConfig.class)
 @Tag("integration")
 class VectorSearchIntegrationTests {
-    
+
     @Autowired
     private OpenAIEmbedderService openAIEmbedderService;
 

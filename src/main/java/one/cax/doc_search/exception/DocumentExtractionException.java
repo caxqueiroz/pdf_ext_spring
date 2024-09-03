@@ -13,5 +13,5 @@ public class DocumentExtractionException extends Exception {
     public DocumentExtractionException(Throwable cause) {
         super(cause);
     }
-    
+
 }

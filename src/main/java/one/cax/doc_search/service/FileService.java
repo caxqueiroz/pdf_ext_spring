@@ -4,7 +4,6 @@ import one.cax.doc_search.exception.FileServiceException;
 import one.cax.doc_search.model.NameUtils;
 import one.cax.doc_search.model.XDoc;
 import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -14,7 +13,7 @@ import java.nio.file.Paths;
 
 
 /**
- * FileService is a service that manages file operations.   
+ * FileService is a service that manages file operations.
  */
 @Service
 public class FileService {
@@ -28,6 +27,7 @@ public class FileService {
 
     /**
      * Extract text from a file
+     *
      * @param filePath - path to the file
      * @return text
      */
@@ -37,15 +37,16 @@ public class FileService {
         try {
             asBytes = Files.readAllBytes(path);
         } catch (IOException e) {
-            throw new FileServiceException("Error reading to memory: ",e);
+            throw new FileServiceException("Error reading to memory: ", e);
         }
         return extractTextFrom(asBytes, NameUtils.APPLICATION_PDF);
     }
 
     /**
      * Extract text from a file in bytes
+     *
      * @param fileInBytes - file in bytes
-     * @param fileType - file type
+     * @param fileType    - file type
      * @return XDoc object
      */
     public XDoc extractTextFrom(byte[] fileInBytes, String fileType) throws FileServiceException {
@@ -56,5 +57,5 @@ public class FileService {
             throw new FileServiceException("Error extracting text from file type: " + fileType, e);
         }
     }
-    
+
 }

@@ -1,10 +1,10 @@
 package one.cax.doc_search;
 
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import one.cax.doc_search.exception.DocumentExtractionException;
 import one.cax.doc_search.model.XDoc;
 import one.cax.doc_search.service.ExtractorEngine;
-import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -42,7 +42,7 @@ class ExtractionEngineTests {
         byte[] fileInBytes = TestUtils.createPdf("");
         XDoc xDoc = extractorEngine.extractTextFromPDF(fileInBytes);
         assertEquals(" ", xDoc.getDocTitle());
-        
+
     }
 
     @Test
@@ -51,7 +51,7 @@ class ExtractionEngineTests {
         byte[] fileInBytes = TestUtils.createPdf("a".repeat(1000000));
         XDoc xDoc = extractorEngine.extractTextFromPDF(fileInBytes);
         assertNotNull(xDoc.getDocTitle());
-      
+
     }
 
     @Test
@@ -59,6 +59,6 @@ class ExtractionEngineTests {
         ExtractorEngine extractorEngine = new ExtractorEngine(meterRegistry);
         byte[] fileInBytes = "This is not a valid PDF".getBytes();
         assertThrows(DocumentExtractionException.class, () -> extractorEngine.extractTextFromPDF(fileInBytes));
-    }   
+    }
 
 }

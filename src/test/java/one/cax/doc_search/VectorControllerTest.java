@@ -82,7 +82,6 @@ class VectorControllerTest {
     }
 
 
-
     @Test
     void testAddDocument_VectorSearchException() throws Exception {
         Mockito.when(vectorSearch.addDocument(any(UUID.class), any())).thenThrow(new VectorSearchException("Failed to add document"));

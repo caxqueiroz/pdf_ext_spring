@@ -1,8 +1,8 @@
 package one.cax.doc_search.controller;
 
-import one.cax.doc_search.service.SessionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import one.cax.doc_search.service.SessionService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -23,6 +23,7 @@ public class SessionController {
 
     /**
      * Create a new session
+     *
      * @return - response entity
      */
     @PostMapping("/start")
@@ -30,15 +31,16 @@ public class SessionController {
     public ResponseEntity<String> createSession() {
         UUID sessionId = sessionService.createSession();
         URI location = ServletUriComponentsBuilder
-            .fromCurrentContextPath()
-            .path("/session/{id}")
-            .buildAndExpand(sessionId)
-            .toUri();
+                .fromCurrentContextPath()
+                .path("/session/{id}")
+                .buildAndExpand(sessionId)
+                .toUri();
         return ResponseEntity.created(location).body(sessionId.toString());
     }
 
     /**
      * Checks session id
+     *
      * @param sessionId - session id
      * @return - response entity
      */
@@ -53,6 +55,7 @@ public class SessionController {
 
     /**
      * Ends session. all session data will be deleted
+     *
      * @param sessionId - session id
      * @return - response entity
      */

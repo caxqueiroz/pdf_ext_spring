@@ -53,6 +53,7 @@ public class TestUtils {
 
     /**
      * Get the URI for a search request.
+     *
      * @param sessionId
      * @param action
      * @return

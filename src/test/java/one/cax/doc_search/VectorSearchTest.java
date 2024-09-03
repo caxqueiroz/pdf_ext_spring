@@ -1,5 +1,9 @@
 package one.cax.doc_search;
 
+import io.github.jbellis.jvector.vector.VectorUtil;
+import io.github.jbellis.jvector.vector.VectorizationProvider;
+import io.github.jbellis.jvector.vector.types.VectorFloat;
+import io.github.jbellis.jvector.vector.types.VectorTypeSupport;
 import one.cax.doc_search.exception.EmbedderException;
 import one.cax.doc_search.exception.VectorSearchException;
 import one.cax.doc_search.model.Session;
@@ -8,10 +12,6 @@ import one.cax.doc_search.model.XPage;
 import one.cax.doc_search.service.OpenAIEmbedderService;
 import one.cax.doc_search.service.SessionService;
 import one.cax.doc_search.service.VectorSearch;
-import io.github.jbellis.jvector.vector.VectorUtil;
-import io.github.jbellis.jvector.vector.VectorizationProvider;
-import io.github.jbellis.jvector.vector.types.VectorFloat;
-import io.github.jbellis.jvector.vector.types.VectorTypeSupport;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,6 +44,29 @@ public class VectorSearchTest {
 
     @Value("${doc_ext_search.similarity.function}")
     private String similarityFunctionName;
+    @Mock
+    private OpenAIEmbedderService embedderService;
+    @Mock
+    private SessionService sessionService;
+    @InjectMocks
+    private VectorSearch vectorSearch;
+    private UUID sessionId;
+    private XDoc document;
+    private List<XDoc> documents;
+
+    public static VectorFloat<?> randomVector(int dim) {
+        VectorTypeSupport vts = VectorizationProvider.getInstance().getVectorTypeSupport();
+        Random R = ThreadLocalRandom.current();
+        VectorFloat<?> vec = vts.createFloatVector(dim);
+        for (int i = 0; i < dim; i++) {
+            vec.set(i, R.nextFloat());
+            if (R.nextBoolean()) {
+                vec.set(i, -vec.get(i));
+            }
+        }
+        VectorUtil.l2normalize(vec);
+        return vec;
+    }
 
     @Test
     void testLoadProperty() {
@@ -51,25 +74,12 @@ public class VectorSearchTest {
         assertEquals("EUCLIDEAN", similarityFunctionName);
     }
 
-    @Mock
-    private OpenAIEmbedderService embedderService;
-
-    @Mock
-    private SessionService sessionService;
-
-    @InjectMocks
-    private VectorSearch vectorSearch;
-
-    private UUID sessionId;
-    private XDoc document;
-    private List<XDoc> documents;
-
     @BeforeEach
     public void setUp() {
         sessionId = UUID.randomUUID();
         document = new XDoc();
         document.setDocTitle("Title 1");
-    
+
 
         XPage xPage = new XPage();
         xPage.setPageNumber(1);
@@ -89,7 +99,7 @@ public class VectorSearchTest {
         when(sessionService.sessionExists(sessionId)).thenReturn(true);
         Session session = mock(Session.class);
         when(sessionService.getSession(sessionId)).thenReturn(session);
-        
+
 
         vectorSearch.addDocument(sessionId, document);
 
@@ -126,19 +136,5 @@ public class VectorSearchTest {
         when(sessionService.sessionExists(sessionId)).thenReturn(false);
 
         assertThrows(VectorSearchException.class, () -> vectorSearch.search(sessionId, "query"));
-    }
-
-    public static VectorFloat<?> randomVector(int dim) {
-        VectorTypeSupport vts = VectorizationProvider.getInstance().getVectorTypeSupport();
-        Random R = ThreadLocalRandom.current();
-        VectorFloat<?> vec = vts.createFloatVector(dim);
-        for (int i = 0; i < dim; i++) {
-            vec.set(i, R.nextFloat());
-            if (R.nextBoolean()) {
-                vec.set(i, -vec.get(i));
-            }
-        }
-        VectorUtil.l2normalize(vec);
-        return vec;
     }
 }

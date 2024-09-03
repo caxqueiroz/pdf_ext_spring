@@ -20,7 +20,7 @@ class XDocTests {
         XDoc xDoc = new XDoc();
         xDoc.setDocTitle("Test Title");
         xDoc.setFilename("test.pdf");
-        
+
         xDoc.setMetadata(new HashMap<>());
 
         XPage page1 = new XPage();

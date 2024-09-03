@@ -17,19 +17,19 @@ import java.util.List;
 @Service
 public class OpenAIEmbedderService implements Embedder {
 
-    /* model ide  */
-    private String model;
     /* openAIClient  */
     private final OpenAIClient openAIClient;
+    /* model ide  */
+    private String model;
 
     /**
      * Constructor for OpenAIEmbedderService
      */
     public OpenAIEmbedderService(String apiUrl, String apiKey, String apiModel) {
         openAIClient = new OpenAIClientBuilder()
-        .endpoint(apiUrl)
-        .credential(new AzureKeyCredential(apiKey))
-        .buildClient();
+                .endpoint(apiUrl)
+                .credential(new AzureKeyCredential(apiKey))
+                .buildClient();
         this.model = apiModel;
     }
 
@@ -60,6 +60,7 @@ public class OpenAIEmbedderService implements Embedder {
 
     /**
      * Embed a batch of texts using OpenAI API
+     *
      * @param texts - the texts to embed
      * @return - the embedded texts as a 2D array of float
      * @throws EmbedderException - if the texts are null or empty
