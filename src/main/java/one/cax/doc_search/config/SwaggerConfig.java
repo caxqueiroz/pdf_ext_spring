@@ -21,7 +21,7 @@ public class SwaggerConfig {
     @Bean
     public GroupedOpenApi publicApi() {
         return GroupedOpenApi.builder()
-                .group("pdf-extraction")
+                .group("doc-text-ext-and-search")
                 .pathsToMatch("/**")
                 .build();
     }
