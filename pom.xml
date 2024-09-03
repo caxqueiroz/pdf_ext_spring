@@ -8,8 +8,8 @@
         <version>3.3.3</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>io.cax</groupId>
-    <artifactId>doc_ext_search</artifactId>
+    <groupId>one.cax</groupId>
+    <artifactId>doc_search</artifactId>
     <version>1.0.1-SNAPSHOT</version>
     <name>doc_ext_search</name>
     <description>Doc Extraction and Vector Search</description>
