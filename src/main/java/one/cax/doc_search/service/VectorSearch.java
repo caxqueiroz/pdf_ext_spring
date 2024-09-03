@@ -27,7 +27,20 @@ import java.util.logging.Logger;
 
 
 /**
- * Class that represents the vector search service.
+ * VectorSearch is responsible for managing vector-based document search operations.
+ * 
+ * This service provides methods to add documents to a vector space, perform similarity
+ * searches, and manage the underlying vector representations of documents and queries.
+ * It integrates with OpenAIEmbedderService for generating embeddings and SessionService
+ * for managing user sessions.
+ * 
+ * Key functionalities:
+ * - Adding documents to the vector space
+ * - Performing similarity searches on the vector space
+ * - Managing document embeddings and search configurations
+ * 
+ * The service uses configurable parameters for top-K results and similarity functions,
+ * allowing for flexible and customizable search behavior.
  */
 @Service
 public class VectorSearch {

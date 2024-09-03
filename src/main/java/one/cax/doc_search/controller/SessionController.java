@@ -10,6 +10,20 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.net.URI;
 import java.util.UUID;
 
+/**
+ * SessionController is responsible for managing user sessions in the document search system.
+ * 
+ * This controller provides endpoints for creating new sessions, checking the existence of sessions,
+ * and ending sessions. It interacts with the SessionService to perform these operations.
+ * 
+ * Key functionalities:
+ * - Creating new sessions with unique UUIDs
+ * - Checking if a session exists by its ID
+ * - Ending (removing) sessions and their associated data
+ * 
+ * The controller uses RESTful principles and returns appropriate HTTP status codes and
+ * response bodies for each operation. It also utilizes Swagger annotations for API documentation.
+ */
 @RestController
 @RequestMapping("/session")
 @Tag(name = "SessionController", description = "Controller for managing search sessions")

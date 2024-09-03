@@ -7,7 +7,16 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * A session.
+ * Represents a session that contains multiple documents.
+ * This class encapsulates the concept of a user session, which can hold
+ * multiple XDoc objects representing different documents.
+ *
+ * Key components:
+ * - sessionId: A unique identifier for the session
+ * - documents: A list of XDoc objects representing the documents in the session
+ *
+ * The Session class uses Lombok's @Getter annotation for automatic generation
+ * of getter methods for its fields.
  */
 @Getter
 public class Session {

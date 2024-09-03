@@ -40,6 +40,10 @@ public class SecurityConfig extends SecurityConfigurerAdapter<DefaultSecurityFil
             requests.requestMatchers("/search/**").permitAll();
             requests.requestMatchers("/session/**").permitAll();
             requests.requestMatchers("/docs/**").permitAll();
+            requests.requestMatchers("/swagger-ui/**").permitAll();
+            requests.requestMatchers("/v3/api-docs/**").permitAll();
+            requests.requestMatchers("/swagger-resources/**").permitAll();
+            requests.requestMatchers("/swagger-resources").permitAll();
             requests.anyRequest().authenticated();
         });
         http.csrf(CsrfConfigurer::disable);

@@ -22,8 +22,19 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
- * ExtractorEngine is a service that extracts text from a PDF file.
- * The extracted text is returned as a JSON object.
+ * ExtractorEngine is responsible for extracting text from PDF documents.
+ * 
+ * This service provides methods to extract text from PDF files, either by file path
+ * or directly from byte arrays. It uses Apache PDFBox for PDF processing and includes
+ * metrics for monitoring extraction performance.
+ * 
+ * Key functionalities:
+ * - Extracting text from PDF files specified by file path
+ * - Extracting text from PDF files provided as byte arrays
+ * - Measuring extraction time and success rate using Micrometer metrics
+ * 
+ * The extracted text is returned as either a JSONObject or an XDoc object,
+ * depending on the method used.
  */
 @Service
 public class ExtractorEngine {

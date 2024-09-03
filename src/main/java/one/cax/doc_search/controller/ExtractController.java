@@ -19,6 +19,20 @@ import java.io.File;
 import java.util.UUID;
 import java.util.logging.Logger;
 
+/**
+ * ExtractController is responsible for handling file upload and text extraction operations.
+ * 
+ * This controller provides endpoints for uploading files and extracting text content from them.
+ * It supports both in-memory processing and temporary file storage based on configuration.
+ * 
+ * Key functionalities:
+ * - Uploading files (currently supporting PDF format)
+ * - Extracting text content from uploaded files
+ * - Handling file processing errors
+ * 
+ * The controller uses FileService for text extraction and supports configurable
+ * temporary file storage and in-memory processing options.
+ */
 @RestController
 @RequestMapping("/extract")
 @Tag(name = "ExtractController", description = "Controller for extracting text from documents")

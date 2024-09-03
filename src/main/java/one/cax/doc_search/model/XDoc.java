@@ -14,6 +14,21 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
+/**
+ * Represents a document extracted from a file, typically a PDF.
+ * This class encapsulates all the information related to a document,
+ * including its metadata, content, and pages.
+ *
+ * The XDoc class uses Lombok annotations for automatic generation of
+ * getters, setters, toString, equals, and hashCode methods.
+ *
+ * Key components:
+ * - id: A unique identifier for the document
+ * - docTitle: The title of the document
+ * - filename: The name of the file from which the document was extracted
+ * - metadata: Additional information about the document
+ * - pages: The content of the document, divided into pages
+ */
 @Setter
 @Getter
 @ToString

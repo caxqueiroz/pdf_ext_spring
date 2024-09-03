@@ -7,7 +7,20 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * SessionService is a service that manages user sessions.
+ * SessionService is responsible for managing user sessions.
+ * 
+ * This service provides methods to create, retrieve, and manage sessions
+ * for users interacting with the document search system. It uses a
+ * ConcurrentHashMap to store sessions, ensuring thread-safe operations.
+ * 
+ * Key functionalities:
+ * - Creating new sessions with unique UUIDs
+ * - Retrieving existing sessions by their UUID
+ * - Checking if a session exists
+ * - Ending (removing) sessions
+ * 
+ * The service uses UUID as the key for identifying sessions, providing
+ * a secure and unique identifier for each user session.
  */
 @Service
 public class SessionService {

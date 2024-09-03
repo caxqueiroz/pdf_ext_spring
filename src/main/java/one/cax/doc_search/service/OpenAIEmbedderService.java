@@ -12,7 +12,19 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 /**
- * OpenAIEmbedderService is a service that embeds text using the OpenAI API.
+ * OpenAIEmbedderService is responsible for generating text embeddings using the OpenAI API.
+ * 
+ * This service implements the Embedder interface and provides methods to embed
+ * single texts or batches of texts into vector representations. It uses the Azure
+ * OpenAI client to interact with the OpenAI API.
+ * 
+ * Key functionalities:
+ * - Initializing the OpenAI client with provided API credentials
+ * - Embedding single texts into float vector representations
+ * - Embedding batches of texts into 2D float array representations
+ * 
+ * The service handles potential errors and throws EmbedderException when issues occur
+ * during the embedding process.
  */
 @Service
 public class OpenAIEmbedderService implements Embedder {

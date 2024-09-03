@@ -17,7 +17,21 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
 
-
+/**
+ * VectorController is responsible for handling vector search operations.
+ * 
+ * This controller provides endpoints for adding documents to the vector space,
+ * uploading files, and performing vector-based searches. It integrates with
+ * ExtractorEngine for text extraction and VectorSearch for search operations.
+ * 
+ * Key functionalities:
+ * - Adding documents to the vector space
+ * - Uploading files and processing them for vector search
+ * - Performing vector-based searches on added documents
+ * 
+ * The controller uses SessionService (indirectly through VectorSearch) to manage
+ * user sessions and ensure proper isolation of search contexts.
+ */
 @RestController
 @RequestMapping("/search")
 @Tag(name = "VectorController", description = "Controller for vector search operations")
@@ -39,7 +53,7 @@ public class VectorController {
     }
 
     /**
-     * Add a document to the vector space.
+     * Add a document (as text) to the vector space.
      *
      * @param document  - document to add
      * @param sessionId - session id
