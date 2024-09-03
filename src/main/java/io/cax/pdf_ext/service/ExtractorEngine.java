@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.logging.Logger;
 
 /**
  * ExtractorEngine is a service that extracts text from a PDF file.
@@ -26,7 +25,6 @@ import java.util.logging.Logger;
 @Service
 public class ExtractorEngine {
 
-    private final Logger logger = Logger.getLogger(ExtractorEngine.class.getName());
     private final Timer extractTextFromTimer;
     private final Counter successfulExtractsCounter;
 
@@ -51,19 +49,18 @@ public class ExtractorEngine {
      * Extract text from a PDF file. The extracted text is returned as a JSON object.
      * @param inputFile The path to the PDF file to extract text from.
      * @return A JSON object containing the extracted text.
-     * @throws IOException If an error occurs while reading the document.
+     * @throws DocumentExtractionException If an error occurs while reading the document.
      */
-    public JSONObject extractTextFrom(String inputFile) throws IOException {
-        return extractTextFromTimer.record(() -> {
-            try {
-                JSONObject result  = doExtractTextFrom(inputFile);
+    public JSONObject extractTextFrom(String inputFile) throws DocumentExtractionException {
+        try {
+            return extractTextFromTimer.recordCallable(() -> {
+                JSONObject result = doExtractTextFrom(inputFile);
                 successfulExtractsCounter.increment();
                 return result;
-            } catch(Exception e) {
-                logger.severe(e.getMessage());
-                throw new RuntimeException(e);
-            }
-        });
+            });
+        } catch (Exception e) {
+                throw new DocumentExtractionException("Error extracting text from PDF", e);
+        }
     }
     /**
      * Extract text from a PDF file. The extracted text is returned as a JSON object.
@@ -102,7 +99,6 @@ public class ExtractorEngine {
                 successfulExtractsCounter.increment();
                 return xDoc;
             } catch (IOException e) {
-                logger.severe("Error extracting text from PDF: " + e.getMessage());
                 throw new DocumentExtractionException("Error extracting text from PDF", e);
             }
         } finally {
@@ -169,7 +165,11 @@ public class ExtractorEngine {
         return pageText.replace("\n", " ");
     }
 
-    // converte from JSONObject tags to Metadata
+    /**
+     * Convert a JSON object to a HashMap.
+     * @param doc The JSON object to convert.
+     * @return A HashMap containing the metadata.
+     */
     private HashMap<String, Object> convertToMetadata(JSONObject doc) {
         HashMap<String, Object> metadata = new HashMap<>();
         metadata.put(NameUtils.DOC_TOTAL_PAGES, doc.get(NameUtils.DOC_TOTAL_PAGES));

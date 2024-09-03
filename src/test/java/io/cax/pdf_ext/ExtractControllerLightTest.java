@@ -1,7 +1,11 @@
 package io.cax.pdf_ext;
 
 import io.cax.pdf_ext.controller.ExtractController;
+import io.cax.pdf_ext.exception.DocumentExtractionException;
+import io.cax.pdf_ext.exception.FileServiceException;
+import io.cax.pdf_ext.model.XDoc;
 import io.cax.pdf_ext.service.ExtractorEngine;
+import io.cax.pdf_ext.service.FileService;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,10 +23,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
-public class ExtractControllerLightTest {
+class ExtractControllerLightTest {
 
     @Mock
     private ExtractorEngine extractorEngine;
+
+    @Mock
+    private FileService fileService;
 
     @InjectMocks
     private ExtractController extractController;
@@ -37,62 +44,62 @@ public class ExtractControllerLightTest {
     }
 
     @Test
-    void uploadFileReturnsOkWhenFileIsNotEmpty() throws IOException {
+    void uploadFileReturnsOkWhenFileIsNotEmpty() throws FileServiceException {
         MockMultipartFile file = new MockMultipartFile("file", "test.pdf", "application/pdf", "test data".getBytes());
-        when(extractorEngine.extractTextFrom(anyString())).thenReturn(new JSONObject());
+        when(fileService.extractTextFrom(anyString())).thenReturn(new XDoc());
 
         ResponseEntity<Object> response = extractController.uploadFile(file);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        verify(extractorEngine, times(1)).extractTextFrom(anyString());
+        verify(fileService, times(1)).extractTextFrom(anyString());
     }
 
     @Test
-    void uploadFileReturnsOkWhenFileIsEmpty() throws IOException {
+    void uploadFileReturnsOkWhenFileIsEmpty() throws FileServiceException {
         MockMultipartFile file = new MockMultipartFile("file", "test.pdf", "application/pdf", "".getBytes());
 
         ResponseEntity<Object> response = extractController.uploadFile(file);
 
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals("Please select a file!", response.getBody());
-        verify(extractorEngine, never()).extractTextFrom(anyString());
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals("Please upload a file!", response.getBody());
+        verify(fileService, never()).extractTextFrom(anyString());
     }
 
     @Test
-    void uploadFileReturnsExpectationFailedWhenExceptionOccurs() throws IOException {
+    void uploadFileReturnsExpectationFailedWhenExceptionOccurs() throws FileServiceException {
         MockMultipartFile file = new MockMultipartFile("file", "test.pdf", "application/pdf", "test data".getBytes());
-        when(extractorEngine.extractTextFrom(anyString())).thenThrow(IOException.class);
+        when(fileService.extractTextFrom(anyString())).thenThrow(FileServiceException.class);
 
         ResponseEntity<Object> response = extractController.uploadFile(file);
 
         assertEquals(HttpStatus.EXPECTATION_FAILED, response.getStatusCode());
         assertEquals("Could not upload the file: test.pdf!", response.getBody());
-        verify(extractorEngine, times(1)).extractTextFrom(anyString());
+        verify(fileService, times(1)).extractTextFrom(anyString());
     }
 
 
     @Test
-    void uploadFileGeneratesUniqueFileName() throws IOException {
+    void uploadFileGeneratesUniqueFileName() throws FileServiceException {
         MockMultipartFile file = new MockMultipartFile("file", "test.pdf", "application/pdf", "test data".getBytes());
-        when(extractorEngine.extractTextFrom(anyString())).thenReturn(new JSONObject());
+        when(fileService.extractTextFrom(anyString())).thenReturn(new XDoc());
 
         extractController.uploadFile(file);
 
-        verify(extractorEngine, times(1)).extractTextFrom(matches(".+\\.pdf$"));
+        verify(fileService, times(1)).extractTextFrom(matches(".+\\.pdf$"));
     }
 
     @Test
-    void uploadFileSavesFileToTempFolder() throws IOException {
+    void uploadFileSavesFileToTempFolder() throws FileServiceException {
         MockMultipartFile file = new MockMultipartFile("file", "test.pdf", "application/pdf", "test data".getBytes());
-        when(extractorEngine.extractTextFrom(anyString())).thenReturn(new JSONObject());
+        when(fileService.extractTextFrom(anyString())).thenReturn(new XDoc());
 
         extractController.uploadFile(file);
 
-        verify(extractorEngine, times(1)).extractTextFrom(matches("^" + ReflectionTestUtils.getField(extractController, "tempFolder") + ".+\\.pdf$"));
+        verify(fileService, times(1)).extractTextFrom(matches("^" + ReflectionTestUtils.getField(extractController, "tempFolder") + ".+\\.pdf$"));
     }
 
     @Test
-    void uploadFileReturnsErrorWhenExtractionFails() throws IOException {
+    void uploadFileReturnsErrorWhenExtractionFails() throws DocumentExtractionException {
         MockMultipartFile file = new MockMultipartFile("file", "test.pdf", "application/pdf", "test data".getBytes());
         when(extractorEngine.extractTextFrom(anyString())).thenThrow(new RuntimeException("Extraction failed"));
 

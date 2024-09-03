@@ -1,12 +1,15 @@
 package io.cax.pdf_ext;
 
 import io.cax.pdf_ext.controller.ExtractController;
+import io.cax.pdf_ext.model.XDoc;
 import io.cax.pdf_ext.security.JwtTokenProvider;
 import io.cax.pdf_ext.security.JwtTokenProviderException;
 import io.cax.pdf_ext.security.JwtsWrapper;
 import io.cax.pdf_ext.security.SecurityConfig;
 import io.cax.pdf_ext.service.ExtractorEngine;
+import io.cax.pdf_ext.service.FileService;
 import io.jsonwebtoken.Jwts;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,6 +40,9 @@ import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
@@ -57,8 +63,13 @@ class ExtractControllerTest {
             env.getPropertySources().addFirst(new MapPropertySource("test", map));
         }
     }
+
+
     @MockBean
-    private ExtractorEngine extractorEngine;
+    private FileService fileService;
+
+    @MockBean
+private ExtractorEngine extractorEngine;
 
     @InjectMocks
     private ExtractController extractController;
@@ -101,7 +112,8 @@ class ExtractControllerTest {
     @Test
     void endpointReturnsUnauthorized() throws Exception {
         MockMultipartFile file = new MockMultipartFile("file", "test.pdf", "application/pdf", "test data".getBytes());
-        when(extractorEngine.extractTextFrom(anyString())).thenReturn(new JSONObject());
+
+        when(fileService.extractTextFrom(anyString())).thenReturn(new XDoc());
         mockMvc.perform(multipart("/extract/upload")
                         .file(file)
                         .contentType(MediaType.MULTIPART_FORM_DATA))
@@ -111,7 +123,10 @@ class ExtractControllerTest {
     @Test
     void endpointReturnsOkWithValidJwt() throws Exception {
         MockMultipartFile file = new MockMultipartFile("file", "test.pdf", "application/pdf", TestUtils.createPdf("test data"));
-        when(extractorEngine.extractTextFrom(anyString())).thenReturn(new JSONObject());
+
+        XDoc mockXDoc = new XDoc();
+        when(extractorEngine.extractTextFromPDF(any(byte[].class))).thenReturn(mockXDoc);
+        when(fileService.extractTextFrom(any(byte[].class), eq("application/pdf"))).thenReturn(mockXDoc);
 
         String jwtToken = generateToken("testUser");
 
@@ -132,7 +147,7 @@ class ExtractControllerTest {
     @Test
     void endpointReturnsUnauthorizedWithInvalidJwt() throws Exception {
         MockMultipartFile file = new MockMultipartFile("file", "test.pdf", "application/pdf", TestUtils.createPdf("test data"));
-        when(extractorEngine.extractTextFrom(anyString())).thenReturn(new JSONObject());
+        when(fileService.extractTextFrom(anyString())).thenReturn(new XDoc());
 
         String jwtToken = generateToken("testUser");
 
@@ -147,7 +162,7 @@ class ExtractControllerTest {
     @Test
     void endpointReturnsUnauthorizedWithExpiredJwt() throws Exception {
         MockMultipartFile file = new MockMultipartFile("file", "test.pdf", "application/pdf", TestUtils.createPdf("test data"));
-        when(extractorEngine.extractTextFrom(anyString())).thenReturn(new JSONObject());
+        when(fileService.extractTextFrom(anyString())).thenReturn(new XDoc());
 
         String jwtToken = Jwts.builder()
                 .setSubject("testUser")
@@ -166,7 +181,7 @@ class ExtractControllerTest {
     @Test
     void endpointReturnsUnauthorizedWithNullHeader() throws Exception {
         MockMultipartFile file = new MockMultipartFile("file", "test.pdf", "application/pdf", TestUtils.createPdf("test data"));
-        when(extractorEngine.extractTextFrom(anyString())).thenReturn(new JSONObject());
+        when(fileService.extractTextFrom(anyString())).thenReturn(new XDoc());
 
         mockMvc.perform(multipart("/extract/upload")
                         .file(file)

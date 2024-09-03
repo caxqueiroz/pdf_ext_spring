@@ -55,10 +55,11 @@ public class XDoc {
             json.put(NameUtils.DOC_TOTAL_PAGES, this.getTotalPages());
             
             var jsonArray = new JSONArray();
-            for (XPage page : pages) {
-                jsonArray.put(page.toJSON());
+            if (pages != null) {
+                for (XPage page : pages) {
+                    jsonArray.put(page.toJSON());
+                }
             }
-            
             json.put(NameUtils.DOC_PAGES, jsonArray);
             return json; 
         } catch (JSONException e) {

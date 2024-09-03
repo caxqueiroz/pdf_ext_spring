@@ -100,7 +100,7 @@ public class VectorSearch {
      * @return - the search result
      * @throws VectorSearchException - if an error occurs
      */
-    public JSONObject search(UUID sessionId, String query) throws VectorSearchException, JSONException, IOException {
+    public JSONObject search(UUID sessionId, String query) throws VectorSearchException {
 
         if (sessionService.sessionExists(sessionId)) {
             if (query == null || query.isEmpty()) {
@@ -111,7 +111,7 @@ public class VectorSearch {
             try {
                 embeddedQuery = embedderService.embed(query);
             } catch (EmbedderException e) {
-                throw new RuntimeException(e);
+                throw new VectorSearchException("Error embedding the query: " + e.getMessage(), e);
             }
             var docs = session.getDocuments();
             List<VectorFloat<?>> vectorArray = docs.stream().flatMap(doc -> doc.getPages().stream())
@@ -127,6 +127,7 @@ public class VectorSearch {
             RandomAccessVectorValues ravv = new ListRandomAccessVectorValues(vectorArray, originalDimension);
             var vQuery= vts.createFloatVector(embeddedQuery);
             BuildScoreProvider bsp = BuildScoreProvider.randomAccessScoreProvider(ravv, VectorSimilarityFunction.valueOf(similarityFunctionName));
+
             try (GraphIndexBuilder builder = new GraphIndexBuilder(bsp, ravv.dimension(), 16, 100, 1.2f, 1.2f)) {
                 OnHeapGraphIndex index = builder.build(ravv);
 
@@ -135,6 +136,8 @@ public class VectorSearch {
                     SearchResult sr = searcher.search(ssp, topK, Bits.ALL);
                     return convertSearchResult(sr, docs);
                 }
+            } catch (IOException e) {
+                throw new VectorSearchException("Error building the graph index: " + e.getMessage(), e);
             }
 
         } else {

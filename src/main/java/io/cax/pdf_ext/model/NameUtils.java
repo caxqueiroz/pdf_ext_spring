@@ -11,4 +11,6 @@ public class NameUtils {
     public static final String PAGE_NUMBER = "pageNumber";
     public static final String PAGE_TEXT = "pageText";
     public static final String PAGE_VECTOR = "pageVector";
+
+    public static final String APPLiCATION_PDF = "application/pdf";
 }

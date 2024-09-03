@@ -1,7 +1,10 @@
 package io.cax.pdf_ext.controller;
 
 
+import io.cax.pdf_ext.exception.FileServiceException;
+import io.cax.pdf_ext.model.XDoc;
 import io.cax.pdf_ext.service.ExtractorEngine;
+import io.cax.pdf_ext.service.FileService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,32 +29,52 @@ public class ExtractController {
 
     private final Logger logger = Logger.getLogger(ExtractController.class.getName());
 
+    /* The temporary folder to store the uploaded file */
     @Value("${doc_ext_search.temp_folder}")
     private String tempFolder;
 
-    private final ExtractorEngine extractorEngine;
+    /* Whether to process the file in memory */
+    @Value("${doc_ext_search.file_inmem_processing}")
+    private boolean fileInMemProcessing;
+
+    /* The FileService - extracts text from PDFs */
+    private final FileService fileService;
+
 
     @Autowired
-    public ExtractController(ExtractorEngine extractorEngine) {
-        this.extractorEngine = extractorEngine;
+    public ExtractController(FileService fileService) {
+        this.fileService = fileService;
     }
 
+    /**
+     * Extract text from a file
+     * @param file - the file to extract text from
+     * @return the extracted text
+     */
     @PostMapping("/upload")
     public ResponseEntity<Object> uploadFile(@RequestParam("file") MultipartFile file) {
         try {
             if (file.isEmpty()) {
-                return new ResponseEntity<>("Please select a file!", HttpStatus.OK);
+                return new ResponseEntity<>("Please upload a file!", HttpStatus.BAD_REQUEST);
+            }
+
+            if (fileInMemProcessing) {
+                byte[] bytes = file.getBytes();
+                String fileType = file.getContentType();
+                var xDoc = fileService.extractTextFrom(bytes, fileType);
+                JSONObject response = xDoc.toJSON();
+                return new ResponseEntity<>(response.toString(), HttpStatus.OK);
             }
 
             String fileName = UUID.randomUUID().toString() + ".pdf";
             // save file temp folder
             String tempFilePath = tempFolder + fileName;
             file.transferTo(new File(tempFilePath));
-
-            JSONObject response = extractorEngine.extractTextFrom(tempFilePath);
+            var xDoc = fileService.extractTextFrom(tempFilePath);
+            JSONObject response = xDoc.toJSON();
             return new ResponseEntity<>(response.toString(), HttpStatus.OK);
 
-        } catch (IOException e) {
+        } catch (FileServiceException e) {
             logger.severe(e.getMessage());
             return new ResponseEntity<>("Could not upload the file: " + file.getOriginalFilename() + "!", HttpStatus.EXPECTATION_FAILED);
         } catch (Exception e) {
