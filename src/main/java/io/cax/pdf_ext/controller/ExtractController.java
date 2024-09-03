@@ -2,8 +2,7 @@ package io.cax.pdf_ext.controller;
 
 
 import io.cax.pdf_ext.exception.FileServiceException;
-import io.cax.pdf_ext.model.XDoc;
-import io.cax.pdf_ext.service.ExtractorEngine;
+
 import io.cax.pdf_ext.service.FileService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.json.JSONObject;
@@ -18,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.io.IOException;
+
 import java.util.UUID;
 import java.util.logging.Logger;
 

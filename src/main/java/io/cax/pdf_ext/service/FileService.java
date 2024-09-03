@@ -4,14 +4,14 @@ import io.cax.pdf_ext.exception.FileServiceException;
 import io.cax.pdf_ext.model.NameUtils;
 import io.cax.pdf_ext.model.XDoc;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.logging.Logger;
+
 
 /**
  * FileService is a service that manages file operations.   

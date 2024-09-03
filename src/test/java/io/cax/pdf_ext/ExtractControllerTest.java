@@ -10,7 +10,7 @@ import io.cax.pdf_ext.service.ExtractorEngine;
 import io.cax.pdf_ext.service.FileService;
 import io.jsonwebtoken.Jwts;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
-import org.json.JSONObject;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -43,7 +43,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.anyString;
+
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
@@ -69,7 +69,7 @@ class ExtractControllerTest {
     private FileService fileService;
 
     @MockBean
-private ExtractorEngine extractorEngine;
+    private ExtractorEngine extractorEngine;
 
     @InjectMocks
     private ExtractController extractController;

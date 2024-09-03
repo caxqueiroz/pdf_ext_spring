@@ -6,7 +6,7 @@ import io.cax.pdf_ext.exception.FileServiceException;
 import io.cax.pdf_ext.model.XDoc;
 import io.cax.pdf_ext.service.ExtractorEngine;
 import io.cax.pdf_ext.service.FileService;
-import org.json.JSONObject;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -16,8 +16,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
-
-import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
