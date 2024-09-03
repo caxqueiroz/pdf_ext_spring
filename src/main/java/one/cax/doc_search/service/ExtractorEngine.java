@@ -3,6 +3,7 @@ package one.cax.doc_search.service;
 import one.cax.doc_search.exception.DocumentExtractionException;
 import one.cax.doc_search.model.NameUtils;
 import one.cax.doc_search.model.XDoc;
+import one.cax.doc_search.model.XPage;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
@@ -16,7 +17,9 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * ExtractorEngine is a service that extracts text from a PDF file.
@@ -76,26 +79,28 @@ public class ExtractorEngine {
         }
         Timer.Sample sample = Timer.start();
         try {
-            JSONObject doc = new JSONObject();
+            
             XDoc xDoc = new XDoc();
             try (PDDocument pdDocument = Loader.loadPDF(fileInBytes)) {
                 xDoc.setDocTitle(getTitle(pdDocument));
-                xDoc.setFilename("file.pdf"); 
-                xDoc.setTotalPages(pdDocument.getNumberOfPages());
+                xDoc.setFilename(NameUtils.DEFAULT_FILENAME); 
                 
                 
-                JSONArray pages = new JSONArray();
+                List<XPage> pages = new ArrayList<>();
+
                 PDFTextStripper pdfStripper = new PDFTextStripper();
                 for (int i = 1; i <= pdDocument.getNumberOfPages(); i++) {
                     pdfStripper.setStartPage(i);
                     pdfStripper.setEndPage(i);
                     String pageText = pdfStripper.getText(pdDocument);
-                    pages.put(new JSONObject()
-                        .put(NameUtils.PAGE_NUMBER, i)
-                        .put(NameUtils.PAGE_TEXT, pageText));
+                    var xPage = new XPage();
+                    xPage.setPageNumber(i);
+                    xPage.setText(pageText);
+                    pages.add(xPage);
+                    
                 }
-                doc.put(NameUtils.DOC_PAGES, pages);
-
+                
+                xDoc.setPages(pages);
                 successfulExtractsCounter.increment();
                 return xDoc;
             } catch (IOException e) {

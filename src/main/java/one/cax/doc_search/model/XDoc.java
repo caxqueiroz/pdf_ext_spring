@@ -4,13 +4,17 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+
+import org.apache.xmlbeans.impl.xb.xsdschema.FieldDocument.Field.Xpath;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Setter
 @Getter
@@ -28,13 +32,12 @@ public class XDoc {
     /* The filename of the document */
     private String filename;
 
-    /* The total number of pages in the document */
-    private int totalPages;
+
     /* The metadata of the document */
     private HashMap<String, Object> metadata;
 
     /* The pages of the document */
-    private List<XPage> pages;
+    private AtomicReference<List<XPage>> pages = new AtomicReference<>(new ArrayList<>());
 
     /**
      * Constructor for XDoc.
@@ -42,6 +45,32 @@ public class XDoc {
     public XDoc() {
         this.id = UUID.randomUUID();
     }
+
+
+    /**
+     * 
+     * @return
+     */
+    public List<XPage> getPages() {
+        return this.pages.get();
+    }
+
+    /**
+     *  returns the number of pages in the document. 
+     * @return
+     */
+    public int getTotalPages() {
+        return this.pages.get().size();
+    }
+
+    /**
+     * Set the pages of the document. 
+     * @param pagesList
+     */
+    public void setPages(List<XPage> pagesList) {
+        this.pages.set(pagesList != null ? new ArrayList<>(pagesList) : new ArrayList<>());
+    }
+    
 
     /**
      * Converts the XDoc to a JSONObject.
@@ -56,7 +85,7 @@ public class XDoc {
             
             var jsonArray = new JSONArray();
             if (pages != null) {
-                for (XPage page : pages) {
+                for (XPage page : pages.get()) {
                     jsonArray.put(page.toJSON());
                 }
             }
@@ -77,7 +106,6 @@ public class XDoc {
        var json = new JSONObject(document);
         var xDoc = new XDoc();
         xDoc.setDocTitle(json.getString(NameUtils.DOC_TITLE));
-        xDoc.setTotalPages(json.getInt(NameUtils.DOC_TOTAL_PAGES));
         xDoc.setPages(XPage.fromJSONArray(json.getJSONArray(NameUtils.DOC_PAGES)));
         return xDoc;
     }

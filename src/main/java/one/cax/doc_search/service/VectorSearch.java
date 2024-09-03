@@ -82,7 +82,7 @@ public class VectorSearch {
             });
 
             var session = sessionService.getSession(sessionId);
-            session.getDocuments().add(document);
+            session.addDocument(document);
 
         } else {
             logger.warning("Session does not exist");
@@ -115,11 +115,16 @@ public class VectorSearch {
                 throw new VectorSearchException("Error embedding the query: " + e.getMessage(), e);
             }
             var docs = session.getDocuments();
-            List<VectorFloat<?>> vectorArray = docs.stream().flatMap(doc -> doc.getPages().stream())
-            .map(XPage::getVector)
-            .map(vts::createFloatVector) // Create a float vector
-            .collect(Collectors.toList());
-
+            List<VectorFloat<?>> vectorArray = new ArrayList<>();
+            List<PageInfo> pageInfoList = new ArrayList<>();
+        
+            for (XDoc doc : docs) {
+                for (XPage page : doc.getPages()) {
+                    vectorArray.add(vts.createFloatVector(page.getVector()));
+                    pageInfoList.add(new PageInfo(doc.getId(), page.getPageNumber(), page.getText()));
+                }
+            }
+            
             if (vectorArray.isEmpty()) {
                 throw new VectorSearchException("No documents to search!");
             }
@@ -135,7 +140,7 @@ public class VectorSearch {
                 try (GraphSearcher searcher = new GraphSearcher(index)) {
                     SearchScoreProvider ssp = SearchScoreProvider.exact(vQuery, VectorSimilarityFunction.valueOf(similarityFunctionName), ravv);
                     SearchResult sr = searcher.search(ssp, topK, Bits.ALL);
-                    return convertSearchResult(sr, docs);
+                    return convertSearchResult(sr, pageInfoList);
                 }
             } catch (IOException e) {
                 throw new VectorSearchException("Error building the graph index: " + e.getMessage(), e);
@@ -152,14 +157,35 @@ public class VectorSearch {
      * @param docs - the documents
      * @return - the JSON object
      */
-    private JSONObject convertSearchResult(SearchResult sr, List<XDoc> docs) throws JSONException {
+    private JSONObject convertSearchResult(SearchResult sr, List<PageInfo> pageInfoList) throws JSONException {
 
-        List<XDoc> results = new ArrayList<>();
-        for (SearchResult.NodeScore ns : sr.getNodes()) {
-            results.add(docs.get(ns.node));
-        }
         JSONObject response = new JSONObject();
+        List<JSONObject> results = new ArrayList<>();
+    
+        for (SearchResult.NodeScore ns : sr.getNodes()) {
+            PageInfo pageInfo = pageInfoList.get(ns.node);
+            JSONObject result = new JSONObject();
+            result.put("docId", pageInfo.docId);
+            result.put("pageNumber", pageInfo.pageNumber);
+            result.put("score", ns.score);
+            result.put("text", pageInfo.text);
+            results.add(result);
+        }
+    
         response.put("results", results);
         return response;
     }
+
+    private static class PageInfo {
+        UUID docId;
+        int pageNumber;
+        String text;
+    
+        PageInfo(UUID docId, int pageNumber, String text) {
+            this.docId = docId;
+            this.pageNumber = pageNumber;
+            this.text = text;
+        }
+    }
 }
+

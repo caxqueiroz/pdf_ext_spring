@@ -14,6 +14,8 @@ public class NameUtils {
 
     public static final String APPLICATION_PDF = "application/pdf";
 
+    public static final String DEFAULT_FILENAME = "file.pdf";
+
     private NameUtils() {
         throw new IllegalStateException("Utility class");
     }

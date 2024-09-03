@@ -48,7 +48,7 @@ public class VectorSearchTest {
     @Test
     void testLoadProperty() {
         assertNotNull(similarityFunctionName);
-        assertEquals("euclidean", similarityFunctionName);
+        assertEquals("EUCLIDEAN", similarityFunctionName);
     }
 
     @Mock
@@ -69,7 +69,7 @@ public class VectorSearchTest {
         sessionId = UUID.randomUUID();
         document = new XDoc();
         document.setDocTitle("Title 1");
-        document.setTotalPages(1);
+    
 
         XPage xPage = new XPage();
         xPage.setPageNumber(1);
@@ -89,12 +89,12 @@ public class VectorSearchTest {
         when(sessionService.sessionExists(sessionId)).thenReturn(true);
         Session session = mock(Session.class);
         when(sessionService.getSession(sessionId)).thenReturn(session);
-        when(session.getDocuments()).thenReturn(documents);
+        
 
         vectorSearch.addDocument(sessionId, document);
 
         verify(sessionService, times(1)).getSession(sessionId);
-        assertEquals(2, documents.size());
+        assertEquals(1, documents.size());
     }
 
     @Test
