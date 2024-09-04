@@ -9,7 +9,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A page in a document.
+ * Represents a single page of a document.
+ * This class encapsulates the content and metadata of a page, including its text,
+ * page number, and vector representation (if available).
+ *
+ * The XPage class uses Lombok annotations for automatic generation of
+ * getters, setters, no-args constructor, toString, equals, and hashCode methods.
+ *
+ * Key components:
+ * - pageNumber: The number of the page within the document
+ * - text: The textual content of the page
+ * - vector: A float array representing the vector embedding of the page content (optional)
  */
 @Getter
 @Setter
